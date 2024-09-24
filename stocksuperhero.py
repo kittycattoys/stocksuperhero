@@ -67,7 +67,7 @@ if filtered_symbols:
         with col1:
             # Display the company name with label
             logo_url = f"https://ttok.s3.us-west-2.amazonaws.com/{stock_symbol}.svg"
-            st.markdown(f"<div style='text-align:center;'><img src='{logo_url}' style='border-radius:50%; width:100px; height:100px;'/></div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='text-align:center;'><img src='{logo_url}' style='border-radius:10px; width:100px; height:100px;'/></div>", unsafe_allow_html=True)
             # Display the current spst value with label
             st.markdown("<p style='font-size:12px;'>Company Name</p>", unsafe_allow_html=True)
             st.markdown(f"<h1 style='font-weight:bold'>{company_name}</h1>", unsafe_allow_html=True)
