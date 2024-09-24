@@ -110,18 +110,52 @@ if st.button('Refresh Data'):
 
 # Check if DataFrame has data
 if not st.session_state['df'].empty:
-    # Create an Altair line chart
+    # Calculate min and max values for 'p' column
+    min_p = st.session_state['df']['p'].min()
+    max_p = st.session_state['df']['p'].max()
+
+    # Base Altair area chart
     chart = alt.Chart(st.session_state['df']).mark_area().encode(
         x='dt_st:T',
         y='p:Q',
         tooltip=['dt_st:T', 'p:Q']
     ).properties(
         title=f"{stock_symbol} Stock Prices",
-        #width=800,
         height=500
     )
 
-    # Display the Altair chart in Streamlit
-    st.altair_chart(chart, use_container_width=True)
+    # Add horizontal reference lines for min and max
+    min_line = alt.Chart(pd.DataFrame({'p': [min_p], 'label': [f'Min: {min_p:.2f}']})).mark_rule(
+        color='blue', strokeWidth=2
+    ).encode(
+        y='p:Q'
+    )
+
+    max_line = alt.Chart(pd.DataFrame({'p': [max_p], 'label': [f'Max: {max_p:.2f}']})).mark_rule(
+        color='red', strokeWidth=2
+    ).encode(
+        y='p:Q'
+    )
+
+    # Add text labels for min and max lines
+    min_text = alt.Chart(pd.DataFrame({'p': [min_p], 'label': [f'Min: {min_p:.2f}']})).mark_text(
+        align='left', baseline='middle', dx=5, dy=-10, color='white' 
+    ).encode(
+        y='p:Q',
+        text='label:N'
+    )
+
+    max_text = alt.Chart(pd.DataFrame({'p': [max_p], 'label': [f'Max: {max_p:.2f}']})).mark_text(
+        align='left', baseline='middle', dx=5, dy=10, color='white' 
+    ).encode(
+        y='p:Q',
+        text='label:N'
+    )
+
+    # Layer the base chart, reference lines, and text labels
+    final_chart = chart + min_line + max_line + min_text + max_text
+
+    # Display the final chart
+    st.altair_chart(final_chart, use_container_width=True)
 else:
     logging.info("DataFrame is empty, no chart to display.")
