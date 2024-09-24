@@ -19,7 +19,7 @@ if 'df' not in st.session_state:
     logging.info("Initialized empty DataFrame in session state.")
 
 # Query to fetch data for the select boxes (symbols and spst values)
-response_dim = supabase.table('dim').select('sym, spst, cn').execute()  # Ensure 'cn' (company name) is included
+response_dim = supabase.table('dim').select('sym, spst, cn, ind').execute()  # Ensure 'cn' (company name) is included
 
 # Extract the list of unique 'spst' values and symbols ('sym')
 if response_dim.data is None:
@@ -57,25 +57,54 @@ if filtered_symbols:
 
     # Get the corresponding 'spst' value and company name for the selected symbol
     selected_row = df_dim.loc[df_dim['sym'] == stock_symbol]
+        
     if not selected_row.empty:
         spst_value = selected_row['spst'].values[0]
         company_name = selected_row['cn'].values[0]
+        industry = selected_row['ind'].values[0]
         
-        # Create columns layout
-        col1, col2 = st.columns(2)
+        # Display the layout with three columns of varying widths using custom CSS
+        st.markdown("""
+        <style>
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo-column {
+            flex: 0 0 auto;  /* Auto width for logo */
+            text-align: center;
+        }
+        .name-column {
+            flex: 1;  /* Occupies remaining space */
+            text-align: left;
+            padding-left: 20px;
+        }
+        .value-column {
+            flex: 0 0 auto;  /* Auto width for value */
+            text-align: right;
+        }
+        </style>
+        """, unsafe_allow_html=True)
 
-        with col1:
-            # Display the company name with label
-            logo_url = f"https://ttok.s3.us-west-2.amazonaws.com/{stock_symbol}.svg"
-            st.markdown(f"<div style='text-align:center;'><img src='{logo_url}' style='border-radius:10px; width:100px; height:100px;'/></div>", unsafe_allow_html=True)
-            # Display the current spst value with label
-            st.markdown("<p style='font-size:12px;'>Company Name</p>", unsafe_allow_html=True)
-            st.markdown(f"<h1 style='font-weight:bold'>{company_name}</h1>", unsafe_allow_html=True)
+        # Create the container and columns with logo, company name, and value
+        logo_url = f"https://ttok.s3.us-west-2.amazonaws.com/{stock_symbol}.svg"
 
-        with col2:
-            # Display the current spst value with label
-            st.markdown("<p style='font-size:12px;'>Sales Per Share</p>", unsafe_allow_html=True)
-            st.markdown(f"<h1 style='font-weight:bold'>{spst_value}</h1>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="container">
+            <div class="logo-column">
+                <img src="{logo_url}" style="border-radius:10px; width:100px; height:100px;"/>
+            </div>
+            <div class="name-column">
+                <p style="font-size:16px;">{industry}</p>
+                <h1 style="font-weight:bold;">{company_name}</h1>
+            </div>
+            <div class="value-column">
+                <p style="font-size:16px;">Sales Per Share</p>
+                <h1 style="font-weight:bold;">{spst_value}</h1>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
          
 # Button to refresh data
 if st.button('Refresh Data'):
