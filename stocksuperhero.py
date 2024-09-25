@@ -7,6 +7,7 @@ import logging
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Supabase connection details
 url = st.secrets["supabase"]["url"]
 key = st.secrets["supabase"]["key"]
 supabase: Client = create_client(url, key)
@@ -18,173 +19,86 @@ if 'df' not in st.session_state:
     st.session_state['df'] = pd.DataFrame()
     logging.info("Initialized empty DataFrame in session state.")
 
-# Query to fetch data for the select boxes (symbols and spst values)
-response_dim = supabase.table('dim').select('sym, spst, cn, ind').execute()  # Ensure 'cn' (company name) is included
+# Query to fetch data for symbols, spst, ind, sec, and company name
+response_dim = supabase.table('dim').select('sym, spst, cn, ind, sec').execute()
 
-# Extract the list of unique 'spst' values and symbols ('sym')
+# Extract the list of unique values and populate DataFrame
 if response_dim.data is None:
     st.error("Failed to fetch data from Supabase.")
     logging.error(f"Error in response_dim: {response_dim}")
-    symbols = []  # Empty list in case of failure
-    spst_values = []  # Empty list for multi-select
 else:
-    # Create a DataFrame from the response data
     df_dim = pd.DataFrame(response_dim.data)
-    
-    # Extract unique 'spst' column values for the multi-select dropdown
-    spst_values = df_dim['spst'].unique().tolist()
-    logging.info(f"Fetched unique 'spst' values for multi-select: {spst_values}")
 
-# Multi-select for selecting multiple 'spst' values
-if spst_values:
-    selected_spst_values = st.multiselect("Select SPST Values", spst_values, default=spst_values)
-    logging.info(f"Selected SPST values: {selected_spst_values}")
+# Extract unique values for SPST, Industry, and Sector
+spst_values = df_dim['spst'].unique().tolist()
+ind_values = df_dim['ind'].unique().tolist()
+sec_values = df_dim['sec'].unique().tolist()
 
-    # Filter symbols based on the selected SPST values
-    if selected_spst_values:
-        filtered_symbols = df_dim[df_dim['spst'].isin(selected_spst_values)]['sym'].unique().tolist()
+# Multi-select dropdowns for SPST, Industry (ind), and Sector (sec) with cross-filtering logic
+selected_spst_values = st.multiselect("Select SPST Values", spst_values, default=spst_values)
+selected_ind_values = st.multiselect("Select Industry", ind_values, default=ind_values)
+selected_sec_values = st.multiselect("Select Sector", sec_values, default=sec_values)
+
+# Cross-filter logic - apply filters one by one to maintain cross-dropdown relationships
+filtered_df = df_dim.copy()
+
+if selected_spst_values:
+    filtered_df = filtered_df[filtered_df['spst'].isin(selected_spst_values)]
+
+if selected_ind_values:
+    filtered_df = filtered_df[filtered_df['ind'].isin(selected_ind_values)]
+
+if selected_sec_values:
+    filtered_df = filtered_df[filtered_df['sec'].isin(selected_sec_values)]
+
+# Create a searchable dropdown for symbols that includes both 'sym' and 'cn'
+filtered_df['sym_cn'] = filtered_df['sym'] + " - " + filtered_df['cn']
+selected_stock_symbol = st.selectbox(
+    "Select Stock Symbol (Searchable)",
+    filtered_df['sym_cn'],
+)
+
+# Extract selected symbol and get company name
+if selected_stock_symbol:
+    stock_symbol = filtered_df.loc[filtered_df['sym_cn'] == selected_stock_symbol, 'sym'].values[0]
+    company_name = filtered_df.loc[filtered_df['sym_cn'] == selected_stock_symbol, 'cn'].values[0]
+
+# Function to generate the logo URL based on stock symbol
+def get_logo_url(symbol):
+    return f"https://ttok.s3.us-west-2.amazonaws.com/{symbol}.svg"
+
+# Collapsible section to show filtered data in a table
+with st.expander("Show/Hide Filtered Company Data"):
+    if not filtered_df.empty:
+        # Add the company logo, company name, and related fields to the table
+        filtered_df['logo_img'] = filtered_df['sym'].apply(lambda sym: f'<img src="{get_logo_url(sym)}" style="border-radius:10px; width:100px; height:100px;"/>')
+        display_df = filtered_df[['logo_img', 'cn', 'sym', 'spst', 'ind', 'sec']]
+
+        # Render the table as an HTML table with images
+        st.write(display_df.to_html(escape=False, index=False), unsafe_allow_html=True)
     else:
-        filtered_symbols = df_dim['sym'].unique().tolist()
+        st.write("No companies match the selected filters.")
 
-    logging.info(f"Filtered symbols based on selected SPST values: {filtered_symbols}")
-else:
-    filtered_symbols = []
-
-# If there are filtered symbols, populate the select box for symbols
-if filtered_symbols:
-    stock_symbol = st.selectbox('Select Stock Symbol', filtered_symbols)
-    logging.info(f"Selected stock symbol: {stock_symbol}")
-
-    # Get the corresponding 'spst' value and company name for the selected symbol
-    selected_row = df_dim.loc[df_dim['sym'] == stock_symbol]
-        
-    if not selected_row.empty:
-        spst_value = selected_row['spst'].values[0]
-        company_name = selected_row['cn'].values[0]
-        industry = selected_row['ind'].values[0]
-        
-        # Display the layout with three columns of varying widths using custom CSS
-        st.markdown("""
-        <style>
-        .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .logo-column {
-            flex: 0 0 auto;  /* Auto width for logo */
-            text-align: center;
-        }
-        .name-column {
-            flex: 1;  /* Occupies remaining space */
-            text-align: left;
-            padding-left: 20px;
-        }
-        .value-column {
-            flex: 0 0 auto;  /* Auto width for value */
-            text-align: right;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-
-        # Create the container and columns with logo, company name, and value
-        logo_url = f"https://ttok.s3.us-west-2.amazonaws.com/{stock_symbol}.svg"
-
-        st.markdown(f"""
-        <div class="container">
-            <div class="logo-column">
-                <img src="{logo_url}" style="border-radius:10px; width:100px; height:100px;"/>
-            </div>
-            <div class="name-column">
-                <p style="font-size:16px;">{industry}</p>
-                <h1 style="font-weight:bold;">{company_name}</h1>
-            </div>
-            <div class="value-column">
-                <p style="font-size:16px;">Sales Per Share</p>
-                <h1 style="font-weight:bold;">{spst_value}</h1>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-         
-# Button to refresh data
-if st.button('Refresh Data'):
-    logging.info("Refresh Data button clicked.")
-    try:
-        # Modify the query to fetch data for the selected stock symbol and selected 'spst' values
-        if selected_spst_values:
-            query = f"SELECT dt_st, p FROM fact WHERE sym = '{stock_symbol}' AND spst IN ({', '.join([f'\'{v}\'' for v in selected_spst_values])})"
-        else:
-            query = f"SELECT dt_st, p FROM fact WHERE sym = '{stock_symbol}'"
-        
-        logging.info(f"Executing query: {query}")
-
-        # Fetch data into a DataFrame
+# Add the button to fetch and display the chart data for the selected stock symbol
+if st.button('Fetch Stock Data'):
+    if stock_symbol:
         response_fact = supabase.table('fact').select('dt_st, p').eq('sym', stock_symbol).execute()
-
-        # Check if there's data in the response
-        if response_fact.data is None:
-            st.error("Failed to fetch data from Supabase.")
-            logging.error(f"Error in response_fact: {response_fact}")
+        if response_fact.data:
+            df_fact = pd.DataFrame(response_fact.data)
+            if not df_fact.empty:
+                # Plotting stock prices using Altair without axis titles
+                chart = alt.Chart(df_fact).mark_area().encode(
+                    x=alt.X('dt_st:T', axis=None),  # Remove X-axis title
+                    y=alt.Y('p:Q', axis=None),      # Remove Y-axis title
+                    tooltip=['dt_st:T', 'p:Q']
+                ).properties(
+                    title=f"{stock_symbol} Stock Prices",
+                    height=500
+                )
+                st.altair_chart(chart, use_container_width=True)
+            else:
+                st.write("No data available for the selected stock symbol.")
         else:
-            # Convert response data to DataFrame
-            st.session_state['df'] = pd.DataFrame(response_fact.data)
-            logging.info("Data fetched successfully.")
-
-            if st.session_state['df'].empty:
-                st.write("No data available for the selected stock symbol and SPST values.")
-                logging.warning("No data available for the selected stock symbol and SPST values.")
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
-        logging.error(f"An error occurred: {e}")
-
-# Check if DataFrame has data
-if not st.session_state['df'].empty:
-    # Calculate min and max values for 'p' column
-    min_p = st.session_state['df']['p'].min()
-    max_p = st.session_state['df']['p'].max()
-
-    # Base Altair area chart
-    chart = alt.Chart(st.session_state['df']).mark_area().encode(
-        x='dt_st:T',
-        y='p:Q',
-        tooltip=['dt_st:T', 'p:Q']
-    ).properties(
-        title=f"{stock_symbol} Stock Prices",
-        height=500
-    )
-
-    # Add horizontal reference lines for min and max
-    min_line = alt.Chart(pd.DataFrame({'p': [min_p], 'label': [f'Min: {min_p:.2f}']})).mark_rule(
-        color='blue', strokeWidth=2
-    ).encode(
-        y='p:Q'
-    )
-
-    max_line = alt.Chart(pd.DataFrame({'p': [max_p], 'label': [f'Max: {max_p:.2f}']})).mark_rule(
-        color='red', strokeWidth=2
-    ).encode(
-        y='p:Q'
-    )
-
-    # Add text labels for min and max lines
-    min_text = alt.Chart(pd.DataFrame({'p': [min_p], 'label': [f'Min: {min_p:.2f}']})).mark_text(
-        align='left', baseline='middle', dx=5, dy=-10, color='white' 
-    ).encode(
-        y='p:Q',
-        text='label:N'
-    )
-
-    max_text = alt.Chart(pd.DataFrame({'p': [max_p], 'label': [f'Max: {max_p:.2f}']})).mark_text(
-        align='left', baseline='middle', dx=5, dy=10, color='white' 
-    ).encode(
-        y='p:Q',
-        text='label:N'
-    )
-
-    # Layer the base chart, reference lines, and text labels
-    final_chart = chart + min_line + max_line + min_text + max_text
-
-    # Display the final chart
-    st.altair_chart(final_chart, use_container_width=True)
-else:
-    logging.info("DataFrame is empty, no chart to display.")
+            st.error("Failed to fetch data from Supabase.")
+    else:
+        st.write("Please select a stock symbol first.")
