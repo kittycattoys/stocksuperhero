@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import altair as alt
+import altair as alt  # Ensure Altair is imported
 from supabase import create_client, Client
 import logging
 
@@ -19,7 +19,7 @@ if 'df' not in st.session_state:
     st.session_state['df'] = pd.DataFrame()
     logging.info("Initialized empty DataFrame in session state.")
 
-# Query to fetch data for symbols, spst, ind, sec, and company name
+# Query to fetch data for symbols, spst, ind, and sec
 response_dim = supabase.table('dim').select('sym, spst, cn, ind, sec').execute()
 
 # Extract the list of unique values and populate DataFrame
@@ -29,29 +29,73 @@ if response_dim.data is None:
 else:
     df_dim = pd.DataFrame(response_dim.data)
 
-# Extract unique values for SPST, Industry, and Sector
-spst_values = df_dim['spst'].unique().tolist()
-ind_values = df_dim['ind'].unique().tolist()
-sec_values = df_dim['sec'].unique().tolist()
+# Function to filter dropdowns based on selections
+def filter_dataframe(df, selected_spst, selected_ind, selected_sec):
+    """Filter the DataFrame based on the selected dropdown values."""
+    if selected_spst:
+        df = df[df['spst'].isin(selected_spst)]
+    if selected_ind:
+        df = df[df['ind'].isin(selected_ind)]
+    if selected_sec:
+        df = df[df['sec'].isin(selected_sec)]
+    return df
 
-# Multi-select dropdowns for SPST, Industry (ind), and Sector (sec) with cross-filtering logic
-selected_spst_values = st.multiselect("Select SPST Values", spst_values, default=spst_values)
-selected_ind_values = st.multiselect("Select Industry", ind_values, default=ind_values)
-selected_sec_values = st.multiselect("Select Sector", sec_values, default=sec_values)
+# Update dropdowns based on current selections
+def update_dropdowns(df, selected_spst, selected_ind, selected_sec):
+    """Update dropdown options based on the current filtered DataFrame."""
+    # Keep the original DataFrame for available sectors
+    available_spst = df['spst'].unique().tolist()
+    available_sec = df['sec'].unique().tolist()  # Keep all sectors available
 
-# Cross-filter logic - apply filters one by one to maintain cross-dropdown relationships
-filtered_df = df_dim.copy()
+    # Check if any sector is selected
+    if selected_sec:
+        # Filter industries based on selected sectors
+        filtered_df = df[df['sec'].isin(selected_sec)]
+        available_ind = filtered_df['ind'].unique().tolist()
+    else:
+        # If no sector is selected, show all industries
+        available_ind = df['ind'].unique().tolist()
 
-if selected_spst_values:
-    filtered_df = filtered_df[filtered_df['spst'].isin(selected_spst_values)]
+    return available_spst, available_ind, available_sec, df
 
-if selected_ind_values:
-    filtered_df = filtered_df[filtered_df['ind'].isin(selected_ind_values)]
+# Set default selections for dropdowns (if not in session_state)
+if 'selected_spst' not in st.session_state:
+    st.session_state['selected_spst'] = []
+if 'selected_ind' not in st.session_state:
+    st.session_state['selected_ind'] = []
+if 'selected_sec' not in st.session_state:
+    st.session_state['selected_sec'] = []
 
-if selected_sec_values:
-    filtered_df = filtered_df[filtered_df['sec'].isin(selected_sec_values)]
+# Update dropdowns based on the current selections
+available_spst, available_ind, available_sec, filtered_df = update_dropdowns(
+    df_dim, st.session_state['selected_spst'], st.session_state['selected_ind'], st.session_state['selected_sec']
+)
 
-# Create a searchable dropdown for symbols that includes both 'sym' and 'cn'
+# Multi-select dropdowns for Sector, Industry, and SPST
+with st.expander("Filter by Sector, Industry, and SPST", expanded=True):
+    # Sectors will always be available
+    st.session_state['selected_sec'] = st.multiselect(
+        "Select Sector", available_sec, default=st.session_state['selected_sec'], key="sector_multiselect"
+    )
+
+    # Update industries based on selected sectors
+    available_spst, available_ind, available_sec, filtered_df = update_dropdowns(
+        df_dim, st.session_state['selected_spst'], st.session_state['selected_ind'], st.session_state['selected_sec']
+    )
+
+    # Industries dropdown should reflect only industries relevant to selected sectors
+    st.session_state['selected_ind'] = st.multiselect(
+        "Select Industry", available_ind, default=st.session_state['selected_ind'], key="industry_multiselect"
+    )
+    
+    st.session_state['selected_spst'] = st.multiselect(
+        "Select SPST Values", available_spst, default=st.session_state['selected_spst'], key="spst_multiselect"
+    )
+
+# Cross-filter the DataFrame based on the updated selections
+filtered_df = filter_dataframe(df_dim, st.session_state['selected_spst'], st.session_state['selected_ind'], st.session_state['selected_sec'])
+
+# Stock symbol dropdown (sym + cn) remains outside the expander
 filtered_df['sym_cn'] = filtered_df['sym'] + " - " + filtered_df['cn']
 selected_stock_symbol = st.selectbox(
     "Select Stock Symbol (Searchable)",
@@ -63,42 +107,44 @@ if selected_stock_symbol:
     stock_symbol = filtered_df.loc[filtered_df['sym_cn'] == selected_stock_symbol, 'sym'].values[0]
     company_name = filtered_df.loc[filtered_df['sym_cn'] == selected_stock_symbol, 'cn'].values[0]
 
-# Function to generate the logo URL based on stock symbol
-def get_logo_url(symbol):
-    return f"https://ttok.s3.us-west-2.amazonaws.com/{symbol}.svg"
-
-# Collapsible section to show filtered data in a table
-with st.expander("Show/Hide Filtered Company Data"):
+# Display filtered table inside an expanding/collapsible section
+with st.expander("Show Filtered Companies Table", expanded=True):
     if not filtered_df.empty:
-        # Add the company logo, company name, and related fields to the table
-        filtered_df['logo_img'] = filtered_df['sym'].apply(lambda sym: f'<img src="{get_logo_url(sym)}" style="border-radius:10px; width:100px; height:100px;"/>')
-        display_df = filtered_df[['logo_img', 'cn', 'sym', 'spst', 'ind', 'sec']]
+        # Display filtered data with images, company name, and more
+        filtered_df['logo_url'] = filtered_df['sym'].apply(lambda x: f"https://ttok.s3.us-west-2.amazonaws.com/{x}.svg")
+        filtered_df = filtered_df[['logo_url', 'cn', 'sym', 'spst', 'ind', 'sec']]
+        
+        # Set custom column names
+        filtered_df.columns = ['Logo', 'Company Name', 'Symbol', 'SPST', 'Industry', 'Sector']
+        
+        # Display the DataFrame as an HTML table with images and sorting enabled
+        def display_image(url):
+            return f'<img src="{url}" style="border-radius:10px; width:50px; height:50px;" />'
 
-        # Render the table as an HTML table with images
-        st.write(display_df.to_html(escape=False, index=False), unsafe_allow_html=True)
+        # Create a table with images in HTML
+        st.write(filtered_df.to_html(escape=False, formatters={'Logo': display_image}), unsafe_allow_html=True)
+        
+        st.write(filtered_df)  # Also show as a regular table (sortable)
     else:
-        st.write("No companies match the selected filters.")
+        st.write("No data matches the selected criteria.")
 
-# Add the button to fetch and display the chart data for the selected stock symbol
-if st.button('Fetch Stock Data'):
-    if stock_symbol:
-        response_fact = supabase.table('fact').select('dt_st, p').eq('sym', stock_symbol).execute()
-        if response_fact.data:
-            df_fact = pd.DataFrame(response_fact.data)
-            if not df_fact.empty:
-                # Plotting stock prices using Altair without axis titles
-                chart = alt.Chart(df_fact).mark_area().encode(
-                    x=alt.X('dt_st:T', axis=alt.Axis(title=None, grid=True)),  # Visible X-axis, gridlines, no title
-                    y=alt.Y('p:Q', axis=alt.Axis(title=None, grid=True)),   
-                    tooltip=['dt_st:T', 'p:Q']
-                ).properties(
-                    title=f"{stock_symbol} Stock Prices",
-                    height=500
-                )
-                st.altair_chart(chart, use_container_width=True)
-            else:
-                st.write("No data available for the selected stock symbol.")
+# Query the fact table and display the chart based on the selected symbol
+if stock_symbol:
+    response_fact = supabase.table('fact').select('dt_st, p').eq('sym', stock_symbol).execute()
+    if response_fact.data:
+        df_fact = pd.DataFrame(response_fact.data)
+        if not df_fact.empty:
+            # Plotting stock prices using Altair with visible axes, gridlines, and tooltips but without axis titles
+            chart = alt.Chart(df_fact).mark_area().encode(
+                x=alt.X('dt_st:T', axis=alt.Axis(title=None, grid=True)),  # Visible X-axis, gridlines, no title
+                y=alt.Y('p:Q', axis=alt.Axis(title=None, grid=True)),      # Visible Y-axis, gridlines, no title
+                tooltip=['dt_st:T', 'p:Q']  # Tooltip with date and price
+            ).properties(
+                title=f"{stock_symbol} Stock Prices",
+                height=500
+            )
+            st.altair_chart(chart, use_container_width=True)
         else:
-            st.error("Failed to fetch data from Supabase.")
+            st.write("No data available for the selected stock symbol.")
     else:
-        st.write("Please select a stock symbol first.")
+        st.error("Failed to fetch data from Supabase.")
