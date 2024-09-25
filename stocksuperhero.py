@@ -26,8 +26,11 @@ if not st.session_state['authenticated']:
         user_key = st.text_input("Enter your app secret access key", type="password")
         submit_button = st.form_submit_button("Submit")
 
-    # Load the valid keys from secrets
-    valid_keys = list(st.secrets["app_access_keys"].values())
+    if "app_access_keys" in st.secrets:
+        valid_keys = list(st.secrets["app_access_keys"].values())
+    else:
+        logging.error("app_access_keys not found in secrets.")
+        st.error("Application configuration error: Missing access keys.")
 
     # Check if the user key matches any of the valid keys
     if submit_button:
