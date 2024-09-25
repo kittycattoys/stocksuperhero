@@ -88,8 +88,8 @@ if st.button('Fetch Stock Data'):
             if not df_fact.empty:
                 # Plotting stock prices using Altair without axis titles
                 chart = alt.Chart(df_fact).mark_area().encode(
-                    x=alt.X('dt_st:T', axis=None),  # Remove X-axis title
-                    y=alt.Y('p:Q', axis=None),      # Remove Y-axis title
+                    x=alt.X('dt_st:T', axis=alt.Axis(title=None, grid=True)),  # Visible X-axis, gridlines, no title
+                    y=alt.Y('p:Q', axis=alt.Axis(title=None, grid=True)),   
                     tooltip=['dt_st:T', 'p:Q']
                 ).properties(
                     title=f"{stock_symbol} Stock Prices",
