@@ -30,7 +30,6 @@ if not st.session_state['authenticated']:
     # Check if the user key exists in the Supabase app_keys table
     if submit_button:
         response = supabase.table('app_keys').select('key, login_timestamps').eq('key', user_key).execute()
-        print(response)
         if response.data:
             # Authentication success
             st.session_state['authenticated'] = True
@@ -58,7 +57,7 @@ if st.session_state['authenticated']:
         logging.info("Initialized empty DataFrame in session state.")
 
     # Query to fetch data for symbols, spst, ind, and sec
-    response_dim = supabase.table('dim').select('sym, spst, cn, ind, sec').execute()
+    response_dim = supabase.table('dim').select('sym, spst, cn, ind, sec, ps').execute()
 
     # Extract the list of unique values and populate DataFrame
     if response_dim.data is None:
@@ -66,6 +65,9 @@ if st.session_state['authenticated']:
         logging.error(f"Error in response_dim: {response_dim}")
     else:
         df_dim = pd.DataFrame(response_dim.data)
+
+    # Initialize filtered_df as an empty DataFrame
+    filtered_df = pd.DataFrame()
 
     # Function to filter dropdowns based on selections
     def filter_dataframe(df, selected_spst, selected_ind, selected_sec):
@@ -127,7 +129,8 @@ if st.session_state['authenticated']:
     filtered_df = filter_dataframe(df_dim, st.session_state['selected_spst'], st.session_state['selected_ind'], st.session_state['selected_sec'])
 
     # Create a column for sym_cn for the dropdown
-    filtered_df['sym_cn'] = filtered_df['sym'] + " - " + filtered_df['cn']
+    if not filtered_df.empty:
+        filtered_df['sym_cn'] = filtered_df['sym'] + " - " + filtered_df['cn']
 
     # Display the DataFrame with logos, company names, symbols, SPST, industry, and sector in an expander
     with st.expander("Company Details", expanded=False):
@@ -180,3 +183,31 @@ if st.session_state['authenticated']:
                 st.error("Failed to fetch data from Supabase.")
         else:
             st.error("Please select a stock symbol.")
+        
+    with st.expander("PS Metric Bar Chart", expanded=False):
+        # Add debug logging to check the content of filtered_df before plotting
+        st.write(f"Data available for chart: {not filtered_df.empty}")
+        st.write(f"Columns in filtered_df: {filtered_df.columns.tolist()}")  # Show the available columns
+        
+        # Check if filtered_df is empty and has necessary columns
+        if not filtered_df.empty and 'sym' in filtered_df.columns and 'ps' in filtered_df.columns:
+            # Highlight the selected symbol
+            highlight = alt.condition(
+                alt.datum.sym == selected_stock_symbol,  # Condition to highlight the selected symbol
+                alt.value('orange'),  # Color for the selected symbol
+                alt.value('steelblue')  # Default color for the other symbols
+            )
+
+            # Bar chart for PS metric
+            bar_chart = alt.Chart(filtered_df).mark_bar().encode(
+                x=alt.X('sym:N', title=None, sort='-y'),  # X-axis for symbols
+                y=alt.Y('ps:Q', title='PS Metric'),  # Y-axis for PS metric
+                color=highlight,  # Highlight the selected symbol
+                tooltip=['sym', 'ps']  # Tooltip for symbol and PS metric
+            ).properties(
+                title="PS Metric Bar Chart",
+                height=500
+            )
+            st.altair_chart(bar_chart, use_container_width=True)
+        else:
+            st.write("No data available or missing required columns for the selected filters.")
