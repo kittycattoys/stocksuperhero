@@ -294,8 +294,8 @@ if st.session_state['authenticated']:
             # Customize layout
             fig_bar.update_layout(
                 title="PS Metric Bar Chart",
-                xaxis_title="Stock Symbols",
-                yaxis_title="PS Value",
+                #xaxis_title="Stock Symbols",
+                #yaxis_title="PS Value",
                 margin=dict(l=20, r=20, t=40, b=20),
                 height=500
             )
