@@ -298,7 +298,7 @@ if st.session_state['authenticated']:
                 #xaxis_title="Stock Symbols",
                 #yaxis_title="PS Value",
                 margin=dict(l=0, r=0, t=20, b=0),
-                height=500
+                height=500,
                 modebar=dict(remove=["zoom", "pan", "select2d", "lasso2d", "autoScale", "resetScale", "zoomIn", "zoomOut", "resetViews"])
             )
 
