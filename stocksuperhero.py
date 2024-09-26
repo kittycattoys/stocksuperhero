@@ -296,7 +296,7 @@ if st.session_state['authenticated']:
                 title="PS Metric Bar Chart",
                 #xaxis_title="Stock Symbols",
                 #yaxis_title="PS Value",
-                margin=dict(l=20, r=20, t=40, b=20),
+                margin=dict(l=0, r=0, t=20, b=0),
                 height=500
             )
 
