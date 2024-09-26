@@ -41,8 +41,8 @@ def create_pie_chart(font_size_factor):
         layout=go.Layout(
             showlegend=False,
             margin=dict(b=0, t=60, l=0, r=0),
-            width=900,  # Width set to 900 pixels for horizontal space
-            height=450,  # Maintain the height
+            width=400,  # Width set to 900 pixels for horizontal space
+            height=400,  # Maintain the height
             paper_bgcolor=plot_bgcolor,
             annotations=[
                 go.layout.Annotation(
