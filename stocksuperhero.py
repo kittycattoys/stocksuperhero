@@ -9,6 +9,101 @@ from datetime import datetime
 # Set page configuration as the first Streamlit command
 st.set_page_config(layout="wide")
 
+#Define the background color and quadrant colors
+plot_bgcolor = "rgba(255, 255, 255, 0)"
+quadrant_colors = [plot_bgcolor, "#f25829", "#f2a529", "#85e043", "#2bad4e"]
+quadrant_text = ["", "<b>Very high</b>", "<b>High</b>", "<b>Medium</b>", "<b>Low</b>", "<b>Very low</b>"]
+n_quadrants = len(quadrant_colors) - 1
+
+# Set the current value and limits
+current_value = 19.0
+min_value = 0
+max_value = 50
+hand_length = np.sqrt(2) / 4
+hand_angle = np.pi * (1 - (max(min_value, min(max_value, current_value)) - min_value) / (max_value - min_value))
+
+# Function to create the pie chart
+def create_pie_chart(font_size_factor):
+    # Adjust font sizes based on the factor
+    annotation_font_size = int(24 * font_size_factor)
+    quadrant_label_font_size = int(12 * font_size_factor)
+
+    fig = go.Figure(
+        data=[go.Pie(
+            values=[0.5] + (np.ones(n_quadrants) / 2 / n_quadrants).tolist(),
+            rotation=90,
+            hole=0.5,
+            marker_colors=quadrant_colors,
+            text=quadrant_text,
+            textinfo="text",
+            hoverinfo="skip",
+        )],
+        layout=go.Layout(
+            showlegend=False,
+            margin=dict(b=0, t=60, l=0, r=0),
+            width=900,  # Width set to 900 pixels for horizontal space
+            height=450,  # Maintain the height
+            paper_bgcolor=plot_bgcolor,
+            annotations=[
+                go.layout.Annotation(
+                    text=f"<b>Price / Sales</b><br><b>{current_value}x</b>",
+                    x=0.5, xanchor="center", xref="paper",
+                    y=0.25, yanchor="bottom", yref="paper",
+                    showarrow=False,
+                    font=dict(size=annotation_font_size)
+                ),
+                # Adding quadrant labels
+                go.layout.Annotation(
+                    text="<b>Very High</b>",
+                    x=0.5, y=0.9, xanchor="center", yanchor="bottom",
+                    font=dict(size=quadrant_label_font_size, color="#f25829"),
+                    showarrow=False
+                ),
+                go.layout.Annotation(
+                    text="<b>High</b>",
+                    x=0.8, y=0.9, xanchor="center", yanchor="bottom",
+                    font=dict(size=quadrant_label_font_size, color="#f2a529"),
+                    showarrow=False
+                ),
+                go.layout.Annotation(
+                    text="<b>Medium</b>",
+                    x=0.9, y=0.4, xanchor="center", yanchor="bottom",
+                    font=dict(size=quadrant_label_font_size, color="#eff229"),
+                    showarrow=False
+                ),
+                go.layout.Annotation(
+                    text="<b>Low</b>",
+                    x=0.5, y=0.2, xanchor="center", yanchor="bottom",
+                    font=dict(size=quadrant_label_font_size, color="#85e043"),
+                    showarrow=False
+                ),
+                go.layout.Annotation(
+                    text="<b>Very Low</b>",
+                    x=0.1, y=0.2, xanchor="center", yanchor="bottom",
+                    font=dict(size=quadrant_label_font_size, color="#2bad4e"),
+                    showarrow=False
+                )
+            ],
+            shapes=[
+                go.layout.Shape(
+                    type="circle",
+                    x0=0.48, x1=0.52,
+                    y0=0.48, y1=0.52,
+                    fillcolor="#333",
+                    line_color="#333",
+                ),
+                go.layout.Shape(
+                    type="line",
+                    x0=0.5, x1=0.5 + hand_length * np.cos(hand_angle),
+                    y0=0.5, y1=0.5 + hand_length * np.sin(hand_angle),
+                    line=dict(color="#333", width=4)
+                )
+            ]
+        )
+    )
+    
+    return fig
+
 # Supabase connection details
 url = st.secrets["supabase"]["url"]
 key = st.secrets["supabase"]["key"]
@@ -210,81 +305,10 @@ if st.session_state['authenticated']:
             st.write("No data available to display in the bar chart.")
 
     # Place the Gauge Chart in a separate expander
-    with st.expander("Gauge Chart", expanded=False):
-        # Adjustable gauge settings
-        section_values = [25, 50, 75, 100]  # Values at the intersection of sections
-        thickness = 70  # Adjust up to 90 for thicker sections
-        gauge_size = 7  # Adjust the gauge size for responsiveness
-        needle_position = filtered_df['ps'].mean() if not filtered_df.empty else 0  # Example: using mean of 'ps'
-    
-        # Create figure and polar axis with transparent background
-        fig, ax = plt.subplots(figsize=(gauge_size, gauge_size / 2), subplot_kw={'projection': 'polar'}, facecolor='none', edgecolor='none')
-        ax.set_theta_offset(np.pi)  # Start from 180 degrees
-        ax.set_ylim(0, 0.8)  # Adjust the height of the gauge
-        ax.set_theta_direction(-1)  # Clockwise
-    
-        # Define sections for the gauge
-        colors = ['green', 'lightgreen', 'lightcoral', 'red']
-        section_angles = [np.pi/4] * 4  # 4 equal parts for the 180 degrees
-    
-        # Plot the gauge sections with adjustable thickness
-        for i, (angle, color) in enumerate(zip(section_angles, colors)):
-            ax.barh(1, angle, left=sum(section_angles[:i]), height=thickness/100, color=color, edgecolor='black')
-    
-        # Add percentage labels aligned to the outer edge (at the intersections)
-        outer_labels = ["0%", "25%", "50%", "75%", "100%"]
-        outer_label_angles = [0, np.pi/4, np.pi/2, 3*np.pi/4, np.pi]  # Angles at section intersections
-    
-        # Place outer percentage labels aligned with the edge
-        for i, (label, label_angle) in enumerate(zip(outer_labels, outer_label_angles)):
-            ax.text(label_angle, 1.1, label, ha='center', va='center', fontsize=12, color='black', fontweight='bold')
-    
-        # Add second row of text labels (Bottom, Low, High, Top)
-        text_labels = ["Bottom", "Low", "High", "Top"]
-        for i, (angle, text_label) in enumerate(zip(section_angles, text_labels)):
-            label_angle = sum(section_angles[:i]) + angle / 2
-            ax.text(label_angle, 1.3, text_label, ha='center', va='center', rotation=np.degrees(label_angle)-90, fontsize=12, color='black')
-    
-        # Add the needle
-        needle_angle = np.interp(needle_position, [0, 100], [0, np.pi])  # Convert value to angle
-        ax.plot([needle_angle, needle_angle], [0, 0.8], color='black', lw=2)  # Extend to the new y-limit
-    
-        # Add small yellow labels inside the lower part of the arc
-        inner_labels = [0, 25, 50, 75, 100]
-        inner_label_angles = [0, np.pi/4, np.pi/2, 3*np.pi/4, np.pi]  # Angles at section intersections
-    
-        # Place the inner labels at the intersections, slightly lower for the "50" value
-        for i, (label, label_angle) in enumerate(zip(inner_labels, inner_label_angles)):
-            radius = 0.6 if label == 50 else 0.5  # Place the "50" value slightly lower
-            ax.text(label_angle, radius, str(label), ha='center', va='center', fontsize=10, color='yellow', fontweight='bold')
-    
-        # Hide polar grid and axis
-        ax.set_axis_off()
-    
-        # Remove bottom padding
-        fig.subplots_adjust(bottom=0)
-    
-        # Display the plot in Streamlit
-        st.pyplot(fig)
-
-        # CSS for responsiveness
-        st.markdown(
-            """
-            <style>
-            @media only screen and (max-width: 600px) {
-                .element-container { 
-                    font-size: 12px;  /* Smaller font for mobile */
-                }
-                .css-18e3th9 { 
-                    max-width: 100% !important;  /* Make the chart fill the screen */
-                }
-            }
-            @media only screen and (min-width: 601px) {
-                .element-container {
-                    font-size: 16px;  /* Larger font for desktop */
-                }
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
+    with st.expander("Stock Superhero", expanded=True):
+        # Fixed factor for font size (you can adjust it if needed)
+        font_size_factor = 1.2  # Adjust this factor to scale font sizes
+        # Create and display the pie chart
+        fig = create_pie_chart(font_size_factor)
+        st.plotly_chart(fig, use_container_width=True)
+        
