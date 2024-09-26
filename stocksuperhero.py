@@ -216,51 +216,54 @@ if st.session_state['authenticated']:
         thickness = 70  # Adjust up to 90 for thicker sections
         gauge_size = 7  # Adjust the gauge size for responsiveness
         needle_position = filtered_df['ps'].mean() if not filtered_df.empty else 0  # Example: using mean of 'ps'
-
-        # Create figure and polar axis
-        fig, ax = plt.subplots(figsize=(gauge_size, gauge_size / 2), subplot_kw={'projection': 'polar'})
+    
+        # Create figure and polar axis with transparent background
+        fig, ax = plt.subplots(figsize=(gauge_size, gauge_size / 2), subplot_kw={'projection': 'polar'}, facecolor='none', edgecolor='none')
         ax.set_theta_offset(np.pi)  # Start from 180 degrees
-        ax.set_ylim(0, 1)
+        ax.set_ylim(0, 0.8)  # Adjust the height of the gauge
         ax.set_theta_direction(-1)  # Clockwise
-
+    
         # Define sections for the gauge
         colors = ['green', 'lightgreen', 'lightcoral', 'red']
         section_angles = [np.pi/4] * 4  # 4 equal parts for the 180 degrees
-
+    
         # Plot the gauge sections with adjustable thickness
         for i, (angle, color) in enumerate(zip(section_angles, colors)):
             ax.barh(1, angle, left=sum(section_angles[:i]), height=thickness/100, color=color, edgecolor='black')
-
+    
         # Add percentage labels aligned to the outer edge (at the intersections)
         outer_labels = ["0%", "25%", "50%", "75%", "100%"]
         outer_label_angles = [0, np.pi/4, np.pi/2, 3*np.pi/4, np.pi]  # Angles at section intersections
-
+    
         # Place outer percentage labels aligned with the edge
         for i, (label, label_angle) in enumerate(zip(outer_labels, outer_label_angles)):
             ax.text(label_angle, 1.1, label, ha='center', va='center', fontsize=12, color='black', fontweight='bold')
-
+    
         # Add second row of text labels (Bottom, Low, High, Top)
         text_labels = ["Bottom", "Low", "High", "Top"]
         for i, (angle, text_label) in enumerate(zip(section_angles, text_labels)):
             label_angle = sum(section_angles[:i]) + angle / 2
             ax.text(label_angle, 1.3, text_label, ha='center', va='center', rotation=np.degrees(label_angle)-90, fontsize=12, color='black')
-
+    
         # Add the needle
         needle_angle = np.interp(needle_position, [0, 100], [0, np.pi])  # Convert value to angle
-        ax.plot([needle_angle, needle_angle], [0, 1], color='black', lw=2)
-
+        ax.plot([needle_angle, needle_angle], [0, 0.8], color='black', lw=2)  # Extend to the new y-limit
+    
         # Add small yellow labels inside the lower part of the arc
         inner_labels = [0, 25, 50, 75, 100]
         inner_label_angles = [0, np.pi/4, np.pi/2, 3*np.pi/4, np.pi]  # Angles at section intersections
-
+    
         # Place the inner labels at the intersections, slightly lower for the "50" value
         for i, (label, label_angle) in enumerate(zip(inner_labels, inner_label_angles)):
             radius = 0.6 if label == 50 else 0.5  # Place the "50" value slightly lower
             ax.text(label_angle, radius, str(label), ha='center', va='center', fontsize=10, color='yellow', fontweight='bold')
-
+    
         # Hide polar grid and axis
         ax.set_axis_off()
-
+    
+        # Remove bottom padding
+        fig.subplots_adjust(bottom=0)
+    
         # Display the plot in Streamlit
         st.pyplot(fig)
 
