@@ -259,6 +259,7 @@ if st.session_state['authenticated']:
                         height=500,
                         hovermode='x',
                         dragmode=False,
+                        yaxis={'showspikes': True, 'spikemode': 'across', 'spikethickness': 2, 'spikedash': 'dash', 'spikecolor': 'orange'},
                         xaxis={'showspikes': True, 'spikemode': 'across', 'spikethickness': 2, 'spikedash': 'dash', 'spikecolor': 'orange'},
                         modebar=dict(remove=["zoom", "pan", "select2d", "lasso2d", "autoScale", "resetScale", "zoomIn", "zoomOut", "resetViews"])
                     )
@@ -298,6 +299,7 @@ if st.session_state['authenticated']:
                 #yaxis_title="PS Value",
                 margin=dict(l=0, r=0, t=20, b=0),
                 height=500
+                modebar=dict(remove=["zoom", "pan", "select2d", "lasso2d", "autoScale", "resetScale", "zoomIn", "zoomOut", "resetViews"])
             )
 
             st.plotly_chart(fig_bar, use_container_width=True)
