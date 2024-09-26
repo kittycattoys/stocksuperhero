@@ -3,6 +3,7 @@ import pandas as pd
 import altair as alt
 from supabase import create_client, Client
 import logging
+from datetime import datetime  # Import for getting the current timestamp
 
 # Set page configuration as the first Streamlit command
 st.set_page_config(layout="wide")
@@ -26,17 +27,24 @@ if not st.session_state['authenticated']:
         user_key = st.text_input("Enter your app secret access key", type="password")
         submit_button = st.form_submit_button("Submit")
 
-    if "app_access_keys" in st.secrets:
-        valid_keys = list(st.secrets["app_access_keys"].values())
-    else:
-        logging.error("app_access_keys not found in secrets.")
-        st.error("Application configuration error: Missing access keys.")
-
-    # Check if the user key matches any of the valid keys
+    # Check if the user key exists in the Supabase app_keys table
     if submit_button:
-        if user_key in valid_keys:
-            st.session_state['authenticated'] = True  # Set the flag to indicate authentication success
+        response = supabase.table('app_keys').select('key, login_timestamps').eq('key', user_key).execute()
+        print(response)
+        if response.data:
+            # Authentication success
+            st.session_state['authenticated'] = True
             st.success("Access Granted!")
+
+            # Get the current timestamp
+            current_timestamp = datetime.now().isoformat()
+
+            # Append the current timestamp to the login_timestamps list
+            timestamps = response.data[0].get('login_timestamps', [])
+            timestamps.append(current_timestamp)
+
+            # Update the table with the new timestamps
+            supabase.table('app_keys').update({'login_timestamps': timestamps}).eq('key', user_key).execute()
         else:
             st.error("Invalid access key. The app is protected.")
 else:
@@ -171,4 +179,4 @@ if st.session_state['authenticated']:
             else:
                 st.error("Failed to fetch data from Supabase.")
         else:
-            st.warning("Please select a stock symbol to fetch data.")
+            st.error("Please select a stock symbol.")
