@@ -4,3 +4,4 @@ altair
 supabase
 plotly
 matplotlib
+streamlit-aggrid

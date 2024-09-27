@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from supabase import create_client, Client
 from datetime import datetime
+from st_aggrid import AgGrid, GridOptionsBuilder
 
 # Set page configuration as the first Streamlit command
 st.set_page_config(layout="wide")
@@ -198,16 +199,16 @@ if st.session_state['authenticated']:
     if not filtered_df.empty:
         filtered_df['sym_cn'] = filtered_df['sym'] + " - " + filtered_df['cn']
 
+    # Render the Plotly table inside an expander
     with st.expander("Company Details", expanded=False):
         if not filtered_df.empty:
-            filtered_df['logo_url'] = filtered_df['sym'].apply(lambda x: f"https://ttok.s3.us-west-2.amazonaws.com/{x}.svg")
-            filtered_display = filtered_df[['logo_url', 'cn', 'sym', 'spst', 'ind', 'sec']]
-            filtered_display.columns = ['Logo', 'Company Name', 'Symbol', 'SPST', 'Industry', 'Sector']
-            def display_image(url):
-                return f'<img src="{url}" style="border-radius:10px; width:50px; height:50px;" />'
-            st.write(filtered_display.to_html(escape=False, formatters={'Logo': display_image}), unsafe_allow_html=True)
+            df = filtered_df
+
+            AgGrid(df)
+
         else:
             st.write("No data available for the selected filters.")
+
 
     selected_stock_symbol = st.selectbox(
         "Select Stock Symbol (Searchable)", 
