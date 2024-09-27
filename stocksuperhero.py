@@ -6,6 +6,7 @@ from supabase import create_client, Client
 from datetime import datetime
 from st_aggrid import AgGrid
 from functions.agstyler import PINLEFT, PRECISION_TWO, draw_grid 
+from functions.gauge import create_pie_chart 
 
 # Set page configuration as the first Streamlit command
 st.set_page_config(layout="wide")
@@ -140,7 +141,7 @@ if st.session_state['authenticated']:
                         if response_fact.data:
                             df_fact = pd.DataFrame(response_fact.data)
                             if not df_fact.empty:
-                                # Plotting stock prices using Plotly
+                                # Area chart for stock prices
                                 fig = go.Figure()
 
                                 # Add the area chart for stock prices
