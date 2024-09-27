@@ -214,7 +214,7 @@ if st.session_state['authenticated']:
                     'ps': ('P/S', {**PRECISION_TWO, 'width': 80}),
                 }
 
-                row_number = st.number_input('Number of rows', min_value=0, value=20)
+                row_number = st.number_input('Number of rows', min_value=0, value=100)
 
                 # Draw the grid with single selection and use checkbox as a boolean
                 data = draw_grid(
