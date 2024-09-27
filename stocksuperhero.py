@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 from supabase import create_client, Client
 from datetime import datetime
 from st_aggrid import AgGrid, GridOptionsBuilder
+from functions.agstyler import PINLEFT, PRECISION_TWO, draw_grid
 
 # Set page configuration as the first Streamlit command
 st.set_page_config(layout="wide")
@@ -203,6 +204,22 @@ if st.session_state['authenticated']:
     with st.expander("Company Details", expanded=False):
         if not filtered_df.empty:
             df = filtered_df
+
+            formatter = {
+                'sym': ('Symbol', PINLEFT),
+                'ind': ('Industry', {'width': 140}),
+                'ps': ('P/S', {**PRECISION_TWO, 'width': 80}),
+            }
+
+            row_number = st.number_input('Number of rows', min_value=0, value=20)
+            data = draw_grid(
+                df.head(row_number),
+                formatter=formatter,
+                fit_columns=True,
+                selection='multiple',  # or 'single', or None
+                use_checkbox='True',  # or False by default
+                max_height=300
+            )
 
             AgGrid(df)
 
