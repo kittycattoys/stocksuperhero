@@ -131,6 +131,7 @@ if st.session_state['authenticated']:
             for selected_row in selected_rows:
                 if isinstance(selected_row, dict):
                     selected_stock_symbol = selected_row.get('sym', 'N/A')
+                    #st.info(f"Selected Symbol: {selected_stock_symbol} (Industry: {selected_row.get('ind', 'N/A')})")
                     
                     # Fetch stock prices based on selected stock symbol
                     response_fact = supabase.table('fact').select('dt_st, p, high_tp, mid_tp, low_tp').eq('sym', selected_stock_symbol).execute()
@@ -223,10 +224,9 @@ if st.session_state['authenticated']:
                         else:
                             st.warning(f"No stock price data found for {selected_stock_symbol}.")
                     else:
-                        st.warning(f"Failed to fetch stock prices for {selected_stock_symbol}.")
-
+                        st.error("Failed to fetch stock prices from Supabase.")
     else:
-        st.warning("No data available for the selected filters.")
+        st.warning("No stocks found for the selected criteria.")
 
     # Place the PS Metric Bar Chart
     if not filtered_df.empty and 'sym' in filtered_df.columns and 'ps' in filtered_df.columns:
