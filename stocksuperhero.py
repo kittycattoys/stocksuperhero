@@ -51,7 +51,8 @@ if st.session_state['authenticated']:
         st.error("Failed to fetch data from Supabase.")
     else:
         df_dim = pd.DataFrame(response_dim.data)
-
+   
+    selected_stock_symbol = None
     filtered_df = pd.DataFrame()
 
     def filter_dataframe(df, selected_spst, selected_ind, selected_sec):
@@ -226,3 +227,78 @@ if st.session_state['authenticated']:
                         st.error("Failed to fetch stock prices from Supabase.")
     else:
         st.warning("No stocks found for the selected criteria.")
+
+    # Place the PS Metric Bar Chart
+    if not filtered_df.empty and 'sym' in filtered_df.columns and 'ps' in filtered_df.columns:
+        fig_bar = go.Figure()
+
+        # Add bar chart
+        fig_bar.add_trace(go.Bar(
+            x=filtered_df['sym'], y=filtered_df['ps'],
+            marker_color='steelblue', name='PS Metric',
+            text=filtered_df['ps'],  # Add data labels
+            textposition='auto',
+            hoverinfo='text+name',
+            hovertemplate='<b>Symbol:</b> %{x}<br><b>PS Metric:</b> %{y}<extra></extra>'
+        ))
+
+        # Highlight selected symbol
+        fig_bar.update_traces(
+            marker=dict(color=['orange' if sym == selected_stock_symbol else 'steelblue' for sym in filtered_df['sym']])
+        )
+
+        # Customize layout
+        fig_bar.update_layout(
+            title="PS Metric Bar Chart",
+            margin=dict(l=0, r=0, t=20, b=0),
+            height=500,
+            modebar=dict(remove=["zoom", "pan", "select2d", "lasso2d", "autoScale", "resetScale", "zoomIn", "zoomOut", "resetViews"])
+        )
+
+        st.plotly_chart(fig_bar, use_container_width=True)
+    else:
+        st.write("No data available to display in the bar chart.")
+
+    st.markdown(
+        """
+        <style>
+        /* Add your CSS styles here */
+        .element-container {
+            display: flex;
+            justify-content: center;
+        }
+        </style>
+        """, 
+        unsafe_allow_html=True
+    )
+
+    # Layout for charts
+    col1, col2 = st.columns(2)
+
+    # First row of charts
+    with col1:
+        st.write("<div style='text-align: center; margin-bottom: 0;'>", unsafe_allow_html=True)
+        fig1 = create_pie_chart()
+        st.plotly_chart(fig1, use_container_width=False, config={'displayModeBar': False})
+        st.write("</div>", unsafe_allow_html=True)
+
+    with col2:
+        st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
+        fig2 = create_pie_chart()
+        st.plotly_chart(fig2, use_container_width=False, config={'displayModeBar': False})
+        st.write("</div>", unsafe_allow_html=True)
+
+    # Second row of charts
+    col3, col4 = st.columns(2)
+
+    with col3:
+        st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
+        fig3 = create_pie_chart()
+        st.plotly_chart(fig3, use_container_width=False, config={'displayModeBar': False})
+        st.write("</div>", unsafe_allow_html=True)
+
+    with col4:
+        st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
+        fig4 = create_pie_chart()
+        st.plotly_chart(fig4, use_container_width=False, config={'displayModeBar': False})
+        st.write("</div>", unsafe_allow_html=True)
