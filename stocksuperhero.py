@@ -203,25 +203,49 @@ if st.session_state['authenticated']:
     # Render the Plotly table inside an expander
     with st.expander("Company Details", expanded=False):
         if not filtered_df.empty:
-            df = filtered_df
+  
 
-            formatter = {
-                'sym': ('Symbol', PINLEFT),
-                'ind': ('Industry', {'width': 140}),
-                'ps': ('P/S', {**PRECISION_TWO, 'width': 80}),
-            }
+# Assuming filtered_df is defined in your code
+                df = filtered_df
 
-            row_number = st.number_input('Number of rows', min_value=0, value=20)
-            data = draw_grid(
-                df.head(row_number),
-                formatter=formatter,
-                fit_columns=True,
-                selection='multiple',  # or 'single', or None
-                use_checkbox='True',  # or False by default
-                max_height=300
-            )
+                formatter = {
+                    'sym': ('Symbol', PINLEFT),
+                    'ind': ('Industry', {'width': 140}),
+                    'ps': ('P/S', {**PRECISION_TWO, 'width': 80}),
+                }
 
-            AgGrid(df)
+                row_number = st.number_input('Number of rows', min_value=0, value=20)
+
+                # Draw the grid with single selection and use checkbox as a boolean
+                data = draw_grid(
+                    df.head(row_number),
+                    formatter=formatter,
+                    fit_columns=True,
+                    selection='single',  # Use 'single' or 'multiple' as required
+                    use_checkbox=True,  # Use checkbox as a boolean
+                    max_height=300,
+                )
+
+                # Print the entire data object for debugging
+                st.write("Data Object:", data)
+
+                # Safely check if selected_rows exists and is not empty
+                selected_rows = getattr(data, 'selected_rows', None)  # Use getattr to avoid AttributeError
+
+                # Debugging: Check the type of selected_rows
+                #st.write("Type of Selected Rows:", type(selected_rows))
+                st.write("Selected Rows:", selected_rows)
+
+                # Check if selected_rows is not None and is a list
+                if selected_rows is not None and isinstance(selected_rows, list) and len(selected_rows) > 0:
+                    # Process selected rows
+                    for selected_row in selected_rows:
+                        if isinstance(selected_row, dict):
+                            st.info(f"Selected Symbol: {selected_row.get('sym', 'N/A')} (Industry: {selected_row.get('ind', 'N/A')})")
+                        else:
+                            st.warning(f"Unexpected type for selected_row: {type(selected_row)}")
+                else:
+                    st.write("No row selected.")
 
         else:
             st.write("No data available for the selected filters.")
