@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 from supabase import create_client, Client
 from datetime import datetime
 from st_aggrid import AgGrid, GridOptionsBuilder
-from functions.agstyler import PINLEFT, PRECISION_TWO, draw_grid
+from functions.agstyler import PINLEFT, PRECISION_TWO, draw_grid 
 from functions.gauge import create_pie_chart 
 
 # Set page configuration as the first Streamlit command
@@ -120,137 +120,109 @@ if st.session_state['authenticated']:
             use_checkbox=True,  # Use checkbox as a boolean
             max_height=300,
         )
-        # Print the entire data object for debugging
-        #st.write("Data Object:", data)
+        
         # Safely check if selected_rows exists and is not empty
-        selected_rows = getattr(data, 'selected_rows', None)  # Use getattr to avoid AttributeError
-        # Debugging: Check the type of selected_rows
-        #st.write("Type of Selected Rows:", type(selected_rows))
-        #st.write("Selected Rows:", selected_rows)
+        selected_rows = getattr(data, 'selected_rows', None)
+        
         # Check if selected_rows is not None and is a list
         if selected_rows is not None and isinstance(selected_rows, list) and len(selected_rows) > 0:
             # Process selected rows
             for selected_row in selected_rows:
                 if isinstance(selected_row, dict):
-                    st.info(f"Selected Symbol: {selected_row.get('sym', 'N/A')} (Industry: {selected_row.get('ind', 'N/A')})")
-                else:
-                    st.warning(f"Unexpected type for selected_row: {type(selected_row)}")
-        else:
-            st.write("No row selected.")
+                    selected_stock_symbol = selected_row.get('sym', 'N/A')
+                    st.info(f"Selected Symbol: {selected_stock_symbol} (Industry: {selected_row.get('ind', 'N/A')})")
+                    
+                    # Fetch stock prices based on selected stock symbol
+                    response_fact = supabase.table('fact').select('dt_st, p, high_tp, mid_tp, low_tp').eq('sym', selected_stock_symbol).execute()
+                    if response_fact.data:
+                        df_fact = pd.DataFrame(response_fact.data)
+                        if not df_fact.empty:
+                            # Plotting stock prices using Plotly
+                            fig = go.Figure()
+
+                            # Add the area chart for stock prices
+                            fig.add_trace(go.Scatter(
+                                x=df_fact['dt_st'], 
+                                y=df_fact['p'],
+                                fill='tozeroy', 
+                                mode='lines', 
+                                name=f"{selected_stock_symbol} Stock Prices",
+                                hovertemplate='<b>Date:</b> %{x}<br><b>Price:</b> %{y}<extra></extra>',
+                                text=df_fact['p'],  # Add data labels
+                                textposition="top center"
+                            ))
+
+                            # Add the line charts for high_tp, mid_tp, low_tp
+                            fig.add_trace(go.Scatter(
+                                x=df_fact['dt_st'], 
+                                y=df_fact['high_tp'],
+                                mode='lines', 
+                                line=dict(color='red', width=2),
+                                name='High TP',
+                                hovertemplate='<b>Date:</b> %{x}<br><b>High TP:</b> %{y}<extra></extra>'
+                            ))
+
+                            fig.add_trace(go.Scatter(
+                                x=df_fact['dt_st'], 
+                                y=df_fact['mid_tp'],
+                                mode='lines', 
+                                line=dict(color='white', width=2),
+                                name='Mid TP',
+                                hovertemplate='<b>Date:</b> %{x}<br><b>Mid TP:</b> %{y}<extra></extra>'
+                            ))
+
+                            fig.add_trace(go.Scatter(
+                                x=df_fact['dt_st'], 
+                                y=df_fact['low_tp'],
+                                mode='lines', 
+                                line=dict(color='green', width=2),
+                                name='Low TP',
+                                hovertemplate='<b>Date:</b> %{x}<br><b>Low TP:</b> %{y}<extra></extra>'
+                            ))
+
+                            # Add rectangles for reference areas
+                            df_rectangles = pd.DataFrame({
+                                'start_date': ["May-31-2019", "Jan-31-2015"], 
+                                'end_date': ["May-31-2022", "Jan-31-2018"], 
+                                'color': ['green', 'red'], 
+                                'label': ['Reference Area 1', 'Reference Area 2']
+                            })
+
+                            # Loop through the dataframe to dynamically add vertical rectangles
+                            for index, row in df_rectangles.iterrows():
+                                fig.add_vrect(
+                                    x0=row['start_date'], 
+                                    x1=row['end_date'],
+                                    fillcolor=row['color'], 
+                                    opacity=0.2,
+                                    layer="below", 
+                                    line_width=0,
+                                    annotation_text=row['label'], 
+                                    annotation_position="top left"
+                                )
+
+                            # Customize layout
+                            fig.update_layout(
+                                title=f"{selected_stock_symbol} Stock Prices",
+                                xaxis_title=None,
+                                yaxis_title=None,
+                                showlegend=False, 
+                                margin=dict(l=20, r=20, t=40, b=20),
+                                height=500,
+                                hovermode='x',
+                                dragmode=False,
+                                yaxis={
+                                    'showspikes': True, 
+                                    'spikemode': 'across', 
+                                    'spikecolor': 'red', 
+                                    'spikethickness': 1
+                                }
+                            )
+                            
+                            st.plotly_chart(fig)
+                        else:
+                            st.warning(f"No stock price data found for {selected_stock_symbol}.")
+                    else:
+                        st.error("Failed to fetch stock prices from Supabase.")
     else:
-        st.write("No data available for the selected filters.")
-
-    selected_stock_symbol = st.selectbox(
-        "Select Stock Symbol (Searchable)", 
-        filtered_df['sym_cn'] if not filtered_df.empty else []
-    )
-
-    if st.button("Fetch Stock Prices"):
-           if selected_stock_symbol:
-               stock_symbol = filtered_df.loc[filtered_df['sym_cn'] == selected_stock_symbol, 'sym'].values[0]
-               response_fact = supabase.table('fact').select('dt_st, p, high_tp, mid_tp, low_tp').eq('sym', stock_symbol).execute()
-               if response_fact.data:
-                   df_fact = pd.DataFrame(response_fact.data)
-                   if not df_fact.empty:
-                       # Plotting stock prices using Plotly
-                       fig = go.Figure()
-    
-                       # Add the area chart for stock prices
-                       fig.add_trace(go.Scatter(
-                           x=df_fact['dt_st'], 
-                           y=df_fact['p'],
-                           fill='tozeroy', 
-                           mode='lines', 
-                           name=f"{stock_symbol} Stock Prices",
-                           hovertemplate='<b>Date:</b> %{x}<br><b>Price:</b> %{y}<extra></extra>',
-                           text=df_fact['p'],  # Add data labels
-                           textposition="top center"
-                       ))
-    
-                       # Add the line charts for high_tp, mid_tp, low_tp
-                       fig.add_trace(go.Scatter(
-                           x=df_fact['dt_st'], 
-                           y=df_fact['high_tp'],
-                           mode='lines', 
-                           line=dict(color='red', width=2),
-                           name='High TP',
-                           hovertemplate='<b>Date:</b> %{x}<br><b>High TP:</b> %{y}<extra></extra>'
-                       ))
-    
-                       fig.add_trace(go.Scatter(
-                           x=df_fact['dt_st'], 
-                           y=df_fact['mid_tp'],
-                           mode='lines', 
-                           line=dict(color='white', width=2),
-                           name='Mid TP',
-                           hovertemplate='<b>Date:</b> %{x}<br><b>Mid TP:</b> %{y}<extra></extra>'
-                       ))
-    
-                       fig.add_trace(go.Scatter(
-                           x=df_fact['dt_st'], 
-                           y=df_fact['low_tp'],
-                           mode='lines', 
-                           line=dict(color='green', width=2),
-                           name='Low TP',
-                           hovertemplate='<b>Date:</b> %{x}<br><b>Low TP:</b> %{y}<extra></extra>'
-                       ))
-    
-                       # Add rectangles for reference areas
-                       df_rectangles = pd.DataFrame({
-                           'start_date': ["May-31-2019", "Jan-31-2015"], 
-                           'end_date': ["May-31-2022", "Jan-31-2018"], 
-                           'color': ['green', 'red'], 
-                           'label': ['Reference Area 1', 'Reference Area 2']
-                       })
-    
-                       # Loop through the dataframe to dynamically add vertical rectangles
-                       for index, row in df_rectangles.iterrows():
-                           fig.add_vrect(
-                               x0=row['start_date'], 
-                               x1=row['end_date'],
-                               fillcolor=row['color'], 
-                               opacity=0.2,
-                               layer="below", 
-                               line_width=0,
-                               annotation_text=row['label'], 
-                               annotation_position="top left"
-                           )
-    
-                       # Customize layout
-                       fig.update_layout(
-                           title=f"{stock_symbol} Stock Prices",
-                           xaxis_title=None,
-                           yaxis_title=None,
-                           showlegend=False, 
-                           margin=dict(l=20, r=20, t=40, b=20),
-                           height=500,
-                           hovermode='x',
-                           dragmode=False,
-                           yaxis={
-                               'showspikes': True, 
-                               'spikemode': 'across', 
-                               'spikethickness': 2, 
-                               'spikedash': 'dash', 
-                               'spikecolor': 'orange'
-                           },
-                           xaxis={
-                               'showspikes': True, 
-                               'spikemode': 'across', 
-                               'spikethickness': 2, 
-                               'spikedash': 'dash', 
-                               'spikecolor': 'orange'
-                           },
-                           modebar=dict(
-                               remove=["zoom", "pan", "select2d", "lasso2d", "autoScale", "resetScale", "zoomIn", "zoomOut", "resetViews"]
-                           )
-                       )
-    
-                       # Display the Plotly chart in Streamlit
-                       st.plotly_chart(fig, use_container_width=True)
-                   else:
-                       st.write("No data available for the selected stock symbol.")
-               else:
-                   st.error("Failed to fetch data from Supabase.")
-           else:
-               st.error("Please select a stock symbol.")
-    
+        st.warning("No stocks found for the selected criteria.")
