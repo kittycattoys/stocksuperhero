@@ -1,13 +1,11 @@
 import streamlit as st
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.graph_objects as go
 from supabase import create_client, Client
 from datetime import datetime
-from st_aggrid import AgGrid, GridOptionsBuilder
+from st_aggrid import AgGrid
 from functions.agstyler import PINLEFT, PRECISION_TWO, draw_grid 
-from functions.gauge import create_pie_chart 
 
 # Set page configuration as the first Streamlit command
 st.set_page_config(layout="wide")
@@ -87,147 +85,151 @@ if st.session_state['authenticated']:
         df_dim, st.session_state['selected_spst'], st.session_state['selected_ind'], st.session_state['selected_sec']
     )
 
-    # Filtering options
-    st.session_state['selected_sec'] = st.multiselect(
-        "Select Sector", available_sec, default=st.session_state['selected_sec'], key="sector_multiselect"
-    )
-    available_spst, available_ind, available_sec, filtered_df = update_dropdowns(
-        df_dim, st.session_state['selected_spst'], st.session_state['selected_ind'], st.session_state['selected_sec']
-    )
-    st.session_state['selected_ind'] = st.multiselect(
-        "Select Industry", available_ind, default=st.session_state['selected_ind'], key="industry_multiselect"
-    )
-    st.session_state['selected_spst'] = st.multiselect(
-        "Select SPST Values", available_spst, default=st.session_state['selected_spst'], key="spst_multiselect"
-    )
+    # Create an expander for dropdowns and table
+    with st.expander("Filter Options and Data Table", expanded=True):
+        col1, col2, col3 = st.columns(3)
 
-    filtered_df = filter_dataframe(df_dim, st.session_state['selected_spst'], st.session_state['selected_ind'], st.session_state['selected_sec'])
+        # Filtering options
+        with col1:
+            st.session_state['selected_sec'] = st.multiselect(
+                "Select Sector", available_sec, default=st.session_state['selected_sec'], key="sector_multiselect"
+            )
+        
+        with col2:
+            st.session_state['selected_ind'] = st.multiselect(
+                "Select Industry", available_ind, default=st.session_state['selected_ind'], key="industry_multiselect"
+            )
+        
+        with col3:
+            st.session_state['selected_spst'] = st.multiselect(
+                "Select SPST Values", available_spst, default=st.session_state['selected_spst'], key="spst_multiselect"
+            )
 
-    if not filtered_df.empty:
-        filtered_df['sym_cn'] = filtered_df['sym'] + " - " + filtered_df['cn']
-        df = filtered_df
-        formatter = {
+        filtered_df = filter_dataframe(df_dim, st.session_state['selected_spst'], st.session_state['selected_ind'], st.session_state['selected_sec'])
+
+        if not filtered_df.empty:
+            filtered_df['sym_cn'] = filtered_df['sym'] + " - " + filtered_df['cn']
+            df = filtered_df
+            formatter = {
                 'sym': ('Symbol', PINLEFT),
                 'ind': ('Industry', {'width': 140}),
                 'ps': ('P/S', {**PRECISION_TWO, 'width': 80}),
-        }
-        #row_number = st.number_input('Number of rows', min_value=0, value=100)
-        # Draw the grid with single selection and use checkbox as a boolean
-        data = draw_grid(
-            df.head(100),
-            formatter=formatter,
-            fit_columns=True,
-            selection='single',  # Use 'single' or 'multiple' as required
-            use_checkbox=True,  # Use checkbox as a boolean
-            max_height=300,
-        )
-        
-        # Safely check if selected_rows exists and is not empty
-        selected_rows = getattr(data, 'selected_rows', None)
-        
-        # Check if selected_rows is not None and is a list
-        if selected_rows is not None and isinstance(selected_rows, list) and len(selected_rows) > 0:
-            # Process selected rows
-            for selected_row in selected_rows:
-                if isinstance(selected_row, dict):
-                    selected_stock_symbol = selected_row.get('sym', 'N/A')
-                    #st.info(f"Selected Symbol: {selected_stock_symbol} (Industry: {selected_row.get('ind', 'N/A')})")
-                    
-                    # Fetch stock prices based on selected stock symbol
-                    response_fact = supabase.table('fact').select('dt_st, p, high_tp, mid_tp, low_tp').eq('sym', selected_stock_symbol).execute()
-                    if response_fact.data:
-                        df_fact = pd.DataFrame(response_fact.data)
-                        if not df_fact.empty:
-                            # Plotting stock prices using Plotly
-                            fig = go.Figure()
+            }
+            # Draw the grid with single selection and use checkbox as a boolean
+            data = draw_grid(
+                df.head(100),
+                formatter=formatter,
+                fit_columns=True,
+                selection='single',  # Use 'single' or 'multiple' as required
+                use_checkbox=True,  # Use checkbox as a boolean
+                max_height=300,
+            )
+            
+            # Safely check if selected_rows exists and is not empty
+            selected_rows = getattr(data, 'selected_rows', None)
+            
+            # Check if selected_rows is not None and is a list
+            if selected_rows is not None and isinstance(selected_rows, list) and len(selected_rows) > 0:
+                # Process selected rows
+                for selected_row in selected_rows:
+                    if isinstance(selected_row, dict):
+                        selected_stock_symbol = selected_row.get('sym', 'N/A')
 
-                            # Add the area chart for stock prices
-                            fig.add_trace(go.Scatter(
-                                x=df_fact['dt_st'], 
-                                y=df_fact['p'],
-                                fill='tozeroy', 
-                                mode='lines', 
-                                name=f"{selected_stock_symbol} Stock Prices",
-                                hovertemplate='<b>Date:</b> %{x}<br><b>Price:</b> %{y}<extra></extra>',
-                                text=df_fact['p'],  # Add data labels
-                                textposition="top center"
-                            ))
+                        # Fetch stock prices based on selected stock symbol
+                        response_fact = supabase.table('fact').select('dt_st, p, high_tp, mid_tp, low_tp').eq('sym', selected_stock_symbol).execute()
+                        if response_fact.data:
+                            df_fact = pd.DataFrame(response_fact.data)
+                            if not df_fact.empty:
+                                # Plotting stock prices using Plotly
+                                fig = go.Figure()
 
-                            # Add the line charts for high_tp, mid_tp, low_tp
-                            fig.add_trace(go.Scatter(
-                                x=df_fact['dt_st'], 
-                                y=df_fact['high_tp'],
-                                mode='lines', 
-                                line=dict(color='red', width=2),
-                                name='High TP',
-                                hovertemplate='<b>Date:</b> %{x}<br><b>High TP:</b> %{y}<extra></extra>'
-                            ))
+                                # Add the area chart for stock prices
+                                fig.add_trace(go.Scatter(
+                                    x=df_fact['dt_st'], 
+                                    y=df_fact['p'],
+                                    fill='tozeroy', 
+                                    mode='lines', 
+                                    name=f"{selected_stock_symbol} Stock Prices",
+                                    hovertemplate='<b>Date:</b> %{x}<br><b>Price:</b> %{y}<extra></extra>',
+                                    text=df_fact['p'],  # Add data labels
+                                    textposition="top center"
+                                ))
 
-                            fig.add_trace(go.Scatter(
-                                x=df_fact['dt_st'], 
-                                y=df_fact['mid_tp'],
-                                mode='lines', 
-                                line=dict(color='white', width=2),
-                                name='Mid TP',
-                                hovertemplate='<b>Date:</b> %{x}<br><b>Mid TP:</b> %{y}<extra></extra>'
-                            ))
+                                # Add the line charts for high_tp, mid_tp, low_tp
+                                fig.add_trace(go.Scatter(
+                                    x=df_fact['dt_st'], 
+                                    y=df_fact['high_tp'],
+                                    mode='lines', 
+                                    line=dict(color='red', width=2),
+                                    name='High TP',
+                                    hovertemplate='<b>Date:</b> %{x}<br><b>High TP:</b> %{y}<extra></extra>'
+                                ))
 
-                            fig.add_trace(go.Scatter(
-                                x=df_fact['dt_st'], 
-                                y=df_fact['low_tp'],
-                                mode='lines', 
-                                line=dict(color='green', width=2),
-                                name='Low TP',
-                                hovertemplate='<b>Date:</b> %{x}<br><b>Low TP:</b> %{y}<extra></extra>'
-                            ))
+                                fig.add_trace(go.Scatter(
+                                    x=df_fact['dt_st'], 
+                                    y=df_fact['mid_tp'],
+                                    mode='lines', 
+                                    line=dict(color='white', width=2),
+                                    name='Mid TP',
+                                    hovertemplate='<b>Date:</b> %{x}<br><b>Mid TP:</b> %{y}<extra></extra>'
+                                ))
 
-                            # Add rectangles for reference areas
-                            df_rectangles = pd.DataFrame({
-                                'start_date': ["May-31-2019", "Jan-31-2015"], 
-                                'end_date': ["May-31-2022", "Jan-31-2018"], 
-                                'color': ['green', 'red'], 
-                                'label': ['Reference Area 1', 'Reference Area 2']
-                            })
+                                fig.add_trace(go.Scatter(
+                                    x=df_fact['dt_st'], 
+                                    y=df_fact['low_tp'],
+                                    mode='lines', 
+                                    line=dict(color='green', width=2),
+                                    name='Low TP',
+                                    hovertemplate='<b>Date:</b> %{x}<br><b>Low TP:</b> %{y}<extra></extra>'
+                                ))
 
-                            # Loop through the dataframe to dynamically add vertical rectangles
-                            for index, row in df_rectangles.iterrows():
-                                fig.add_vrect(
-                                    x0=row['start_date'], 
-                                    x1=row['end_date'],
-                                    fillcolor=row['color'], 
-                                    opacity=0.2,
-                                    layer="below", 
-                                    line_width=0,
-                                    annotation_text=row['label'], 
-                                    annotation_position="top left"
+                                # Add rectangles for reference areas
+                                df_rectangles = pd.DataFrame({
+                                    'start_date': ["May-31-2019", "Jan-31-2015"], 
+                                    'end_date': ["May-31-2022", "Jan-31-2018"], 
+                                    'color': ['green', 'red'], 
+                                    'label': ['Reference Area 1', 'Reference Area 2']
+                                })
+
+                                # Loop through the dataframe to dynamically add vertical rectangles
+                                for index, row in df_rectangles.iterrows():
+                                    fig.add_vrect(
+                                        x0=row['start_date'], 
+                                        x1=row['end_date'],
+                                        fillcolor=row['color'], 
+                                        opacity=0.2,
+                                        layer="below", 
+                                        line_width=0,
+                                        annotation_text=row['label'], 
+                                        annotation_position="top left"
+                                    )
+
+                                # Customize layout
+                                fig.update_layout(
+                                    title=f"{selected_stock_symbol} Stock Prices",
+                                    xaxis_title=None,
+                                    yaxis_title=None,
+                                    showlegend=False, 
+                                    margin=dict(l=20, r=20, t=40, b=20),
+                                    height=500,
+                                    hovermode='x',
+                                    dragmode=False,
+                                    yaxis={
+                                        'showspikes': True, 
+                                        'spikemode': 'across', 
+                                        'spikecolor': 'red', 
+                                        'spikethickness': 1
+                                    }
                                 )
-
-                            # Customize layout
-                            fig.update_layout(
-                                title=f"{selected_stock_symbol} Stock Prices",
-                                xaxis_title=None,
-                                yaxis_title=None,
-                                showlegend=False, 
-                                margin=dict(l=20, r=20, t=40, b=20),
-                                height=500,
-                                hovermode='x',
-                                dragmode=False,
-                                yaxis={
-                                    'showspikes': True, 
-                                    'spikemode': 'across', 
-                                    'spikecolor': 'red', 
-                                    'spikethickness': 1
-                                }
-                            )
-                            
-                            st.plotly_chart(fig)
+                                
+                                st.plotly_chart(fig)
+                            else:
+                                st.warning(f"No stock price data found for {selected_stock_symbol}.")
                         else:
-                            st.warning(f"No stock price data found for {selected_stock_symbol}.")
-                    else:
-                        st.error("Failed to fetch stock prices from Supabase.")
-    else:
-        st.warning("No stocks found for the selected criteria.")
-
+                            st.error("Failed to fetch stock prices from Supabase.")
+        else:
+            st.warning("No matching stocks found.")
+    
     # Place the PS Metric Bar Chart
     if not filtered_df.empty and 'sym' in filtered_df.columns and 'ps' in filtered_df.columns:
         fig_bar = go.Figure()
