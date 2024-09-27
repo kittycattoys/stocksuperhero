@@ -227,14 +227,14 @@ if st.session_state['authenticated']:
                 )
 
                 # Print the entire data object for debugging
-                st.write("Data Object:", data)
+                #st.write("Data Object:", data)
 
                 # Safely check if selected_rows exists and is not empty
                 selected_rows = getattr(data, 'selected_rows', None)  # Use getattr to avoid AttributeError
 
                 # Debugging: Check the type of selected_rows
                 #st.write("Type of Selected Rows:", type(selected_rows))
-                st.write("Selected Rows:", selected_rows)
+                #st.write("Selected Rows:", selected_rows)
 
                 # Check if selected_rows is not None and is a list
                 if selected_rows is not None and isinstance(selected_rows, list) and len(selected_rows) > 0:
