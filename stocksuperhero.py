@@ -8,8 +8,7 @@ from datetime import datetime
 
 # Set page configuration as the first Streamlit command
 st.set_page_config(layout="wide")
-
-#Define the background color and quadrant colors
+# Define the background color and quadrant colors
 plot_bgcolor = "rgba(255, 255, 255, 0)"
 quadrant_colors = [plot_bgcolor, "#f25829", "#f2a529", "#85e043", "#2bad4e"]
 quadrant_text = ["", "<b>Very high</b>", "<b>High</b>", "<b>Medium</b>", "<b>Low</b>", "<b>Very low</b>"]
@@ -23,10 +22,10 @@ hand_length = np.sqrt(2) / 4
 hand_angle = np.pi * (1 - (max(min_value, min(max_value, current_value)) - min_value) / (max_value - min_value))
 
 # Function to create the pie chart
-def create_pie_chart(font_size_factor):
-    # Adjust font sizes based on the factor
-    annotation_font_size = int(24 * font_size_factor)
-    quadrant_label_font_size = int(12 * font_size_factor)
+def create_pie_chart():
+    # Fixed font sizes
+    annotation_font_size = 24
+    quadrant_label_font_size = 12
 
     fig = go.Figure(
         data=[go.Pie(
@@ -40,9 +39,9 @@ def create_pie_chart(font_size_factor):
         )],
         layout=go.Layout(
             showlegend=False,
-            margin=dict(b=0, t=60, l=0, r=0),
-            width=400,  # Width set to 900 pixels for horizontal space
-            height=400,  # Maintain the height
+            margin=dict(b=0, t=20, l=20, r=20),
+            width=350,  
+            height=350,  
             paper_bgcolor=plot_bgcolor,
             annotations=[
                 go.layout.Annotation(
@@ -98,7 +97,9 @@ def create_pie_chart(font_size_factor):
                     y0=0.5, y1=0.5 + hand_length * np.sin(hand_angle),
                     line=dict(color="#333", width=4)
                 )
-            ]
+            ],
+            xaxis=dict(visible=False),
+            yaxis=dict(visible=False)
         )
     )
     
@@ -306,11 +307,34 @@ if st.session_state['authenticated']:
         else:
             st.write("No data available to display in the bar chart.")
 
-    # Place the Gauge Chart in a separate expander
-    with st.expander("Stock Superhero", expanded=True):
-        # Fixed factor for font size (you can adjust it if needed)
-        font_size_factor = 1.2  # Adjust this factor to scale font sizes
-        # Create and display the pie chart
-        fig = create_pie_chart(font_size_factor)
-        st.plotly_chart(fig, use_container_width=True)
-        
+    # Use expander and layout for charts
+    with st.expander("Stock Superhero", expanded=False):
+        col1, col2 = st.columns(2)
+    
+        # First row of charts
+        with col1:
+            st.write("<div style='text-align: center; margin-bottom: 0;'>", unsafe_allow_html=True)
+            fig1 = create_pie_chart()
+            st.plotly_chart(fig1, use_container_width=False, config={'displayModeBar': False})
+            st.write("</div>", unsafe_allow_html=True)
+    
+        with col2:
+            st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
+            fig2 = create_pie_chart()
+            st.plotly_chart(fig2, use_container_width=False, config={'displayModeBar': False})
+            st.write("</div>", unsafe_allow_html=True)
+    
+        # Second row of charts
+        col3, col4 = st.columns(2)
+    
+        with col3:
+            st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
+            fig3 = create_pie_chart()
+            st.plotly_chart(fig3, use_container_width=False, config={'displayModeBar': False})
+            st.write("</div>", unsafe_allow_html=True)
+    
+        with col4:
+            st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
+            fig4 = create_pie_chart()
+            st.plotly_chart(fig4, use_container_width=False, config={'displayModeBar': False})
+            st.write("</div>", unsafe_allow_html=True)
