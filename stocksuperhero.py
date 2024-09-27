@@ -131,7 +131,7 @@ if st.session_state['authenticated']:
             for selected_row in selected_rows:
                 if isinstance(selected_row, dict):
                     selected_stock_symbol = selected_row.get('sym', 'N/A')
-                    st.info(f"Selected Symbol: {selected_stock_symbol} (Industry: {selected_row.get('ind', 'N/A')})")
+                    #st.info(f"Selected Symbol: {selected_stock_symbol} (Industry: {selected_row.get('ind', 'N/A')})")
                     
                     # Fetch stock prices based on selected stock symbol
                     response_fact = supabase.table('fact').select('dt_st, p, high_tp, mid_tp, low_tp').eq('sym', selected_stock_symbol).execute()
