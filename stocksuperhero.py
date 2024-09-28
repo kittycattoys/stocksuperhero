@@ -180,26 +180,57 @@ if st.session_state['authenticated']:
     # This block is now outside the expander
     if selected_stock_symbol:
         # Fetch stock prices based on selected stock symbol
+        response_dim_det = supabase.table('dim_det').select('sym, spst, cn, ind, sec, ps, ex').eq('sym', selected_stock_symbol).execute()
         response_fact = supabase.table('fact').select('dt_st, p, high_tp, mid_tp, low_tp').eq('sym', selected_stock_symbol).execute()
         if response_fact.data:
             df_fact = pd.DataFrame(response_fact.data)
+            df_dim_det = pd.DataFrame(response_dim_det.data)
             if not df_fact.empty:
                 # MAIN APP AREA - FACT AND DIM
-                #TradingView Widgets
-                # Safely fetch stock prices and exchange symbol
-                if not filtered_df.empty and selected_stock_symbol in filtered_df['sym'].values:
-                    selected_exchange = filtered_df[filtered_df['sym'] == selected_stock_symbol]['ex'].values
-                    if len(selected_exchange) > 0:
-                        formatted_symbol = f"{selected_exchange[0]}:{selected_stock_symbol}"
-                        print(formatted_symbol)
-                        show_single_stock_widget(formatted_symbol)
+                # Inline CSS to limit the width of col1 to 150px and align everything left
+                st.markdown("""
+                    <style>
+                    .col1 {
+                        max-width: 150px !important;
+                        float: left;
+                    }
+                    .col2 {
+                        float: left;
+                        padding-left: 10px;
+                    }
+                    </style>
+                    """, unsafe_allow_html=True)
+
+                col1, col2 = st.columns([1, 7], gap="small")  # Adjust ratio for the layout
+
+                with col1:
+                    # Display the company logo (left-aligned with a fixed width)
+                    image_url = f"https://ttok.s3.us-west-2.amazonaws.com/{selected_stock_symbol}.svg"
+                    st.image(image_url, width=150, caption=selected_stock_symbol, use_column_width=False)
+                    st.markdown('<div class="col1"></div>', unsafe_allow_html=True)  # Apply custom class to col1
+
+                with col2:
+                    # Display the sector and industry (aligned with the company name and symbol)
+                    st.subheader(f"{df_dim_det['cn'].iloc[0]} - {selected_stock_symbol}")
+                    # Display the company name and symbol
+                    st.markdown(f"{df_dim_det['sec'].iloc[0]} - {df_dim_det['ind'].iloc[0]}")
+                    # Apply the custom class to col2 for styling
+                    st.markdown('<div class="col2"></div>', unsafe_allow_html=True)
+
+                    # Real-time price widget
+                    if not filtered_df.empty and selected_stock_symbol in filtered_df['sym'].values:
+                        selected_exchange = filtered_df[filtered_df['sym'] == selected_stock_symbol]['ex'].values
+                        if len(selected_exchange) > 0:
+                            formatted_symbol = f"{selected_exchange[0]}:{selected_stock_symbol}"
+                            print(formatted_symbol)
+                            show_single_stock_widget(formatted_symbol)
+                        else:
+                            st.warning("Exchange information is missing for the selected stock symbol.")
                     else:
-                        st.warning("Exchange information is missing for the selected stock symbol.")
-                else:
-                    st.warning(f"Stock symbol {selected_stock_symbol} not found in the filtered data.")
+                        st.warning(f"Stock symbol {selected_stock_symbol} not found in the filtered data.")
 
-                plot_area_chart(df_fact, selected_stock_symbol)    
-
+                plot_area_chart(df_fact, selected_stock_symbol)
+                
                 # Bar Chart
                 fig_bar = plot_bar_chart(filtered_df, selected_stock_symbol)
                 if fig_bar:
