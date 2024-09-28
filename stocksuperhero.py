@@ -198,6 +198,8 @@ if st.session_state['authenticated']:
                 else:
                     st.warning(f"Stock symbol {selected_stock_symbol} not found in the filtered data.")
 
+                plot_area_chart(df_fact, selected_stock_symbol)    
+
                 # Bar Chart
                 fig_bar = plot_bar_chart(filtered_df, selected_stock_symbol)
                 if fig_bar:
