@@ -5,3 +5,4 @@ supabase
 plotly
 matplotlib
 streamlit-aggrid
+yfinance

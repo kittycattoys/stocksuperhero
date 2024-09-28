@@ -10,6 +10,7 @@ from functions.gauge import create_pie_chart
 from functions.area import plot_area_chart
 from functions.bar import plot_bar_chart
 from functions.metric import plot_metric
+import yfinance as yf
 
 # Set page configuration as the first Streamlit command
 st.set_page_config(layout="wide")
@@ -38,12 +39,19 @@ if not st.session_state['authenticated']:
             timestamps = response.data[0].get('login_timestamps', [])
             timestamps.append(current_timestamp)
             supabase.table('app_keys').update({'login_timestamps': timestamps}).eq('key', user_key).execute()
+
+            # Store user_key in session_state
+            st.session_state['user_key'] = user_key
+
+            st.session_state['watchlist'] = response.data[0].get('watchlist', [])
         else:
             st.error("Invalid access key. The app is protected.")
 else:
     st.title("Welcome Superhero")
 
 if st.session_state['authenticated']:
+    user_key = st.session_state.get('user_key') 
+
     if 'df' not in st.session_state:
         st.session_state['df'] = pd.DataFrame()
 
@@ -159,6 +167,45 @@ if st.session_state['authenticated']:
 
                 #Metric
                 plot_metric(df_fact, selected_stock_symbol)
+
+                # Add Watchlist Functionality
+                watchlist = st.session_state['watchlist']
+                
+                # Check if the selected stock symbol is already in the watchlist
+                if any(item['symbol'] == selected_stock_symbol for item in watchlist):
+                    st.warning(f"{selected_stock_symbol} is already in your watchlist.")
+                elif len(watchlist) < 5:
+                    if st.button("Add to Watchlist"):
+                        # Fetch price from Yahoo Finance
+                        stock_data = yf.Ticker(selected_stock_symbol)
+                        price = stock_data.history(period='1d')['Close'].iloc[-1]
+                        timestamp = datetime.now().isoformat()
+    
+                        # Add the stock to the watchlist
+                        watchlist.append({
+                            'symbol': selected_stock_symbol,
+                            'timestamp': timestamp,
+                            'price': price
+                        })
+    
+                        # Update watchlist in Supabase
+                        supabase.table('app_keys').update({'watchlist': watchlist}).eq('key', st.session_state['user_key']).execute()
+                        st.session_state['watchlist'] = watchlist
+                        st.success(f"{selected_stock_symbol} added to watchlist.")
+                else:
+                    st.warning("Watchlist is full. Please remove an existing stock to add a new one.")
+    
+                # Display Watchlist
+                st.subheader("Your Watchlist")
+                for idx, item in enumerate(watchlist):
+                    st.write(f"{item['symbol']} - Added on {item['timestamp']} at ${item['price']:.2f}")
+                    
+                    # Assign a unique key to each remove button using the stock symbol
+                    if st.button(f"Remove {item['symbol']} from Watchlist", key=f"remove_{item['symbol']}"):
+                        watchlist.remove(item)
+                        supabase.table('app_keys').update({'watchlist': watchlist}).eq('key', st.session_state['user_key']).execute()
+                        st.session_state['watchlist'] = watchlist
+                        st.rerun()  # Rerun to update the display
 
             else:
                 st.warning(f"No stock price data found for {selected_stock_symbol}.")
