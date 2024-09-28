@@ -10,7 +10,9 @@ from functions.gauge import create_pie_chart
 from functions.area import plot_area_chart
 from functions.bar import plot_bar_chart
 from functions.metric import plot_metric
+from functions.tradingview import show_single_stock_widget, show_ticker_tape
 import yfinance as yf
+import streamlit.components.v1 as components
 
 # Set page configuration as the first Streamlit command
 st.set_page_config(layout="wide")
@@ -65,7 +67,7 @@ if st.session_state['authenticated']:
 
    # Check if 'df_dim' is loaded and populated
     if 'df_dim' not in st.session_state:
-        response_dim = supabase.table('dim').select('sym, spst, cn, ind, sec, ps').execute()
+        response_dim = supabase.table('dim').select('sym, spst, cn, ind, sec, ps, ex').execute()
         if response_dim.data is None:
             st.error("Failed to fetch data from Supabase.")
         else:
@@ -183,8 +185,18 @@ if st.session_state['authenticated']:
             df_fact = pd.DataFrame(response_fact.data)
             if not df_fact.empty:
                 # MAIN APP AREA - FACT AND DIM
-                # Price
-                plot_area_chart(df_fact, selected_stock_symbol)
+                #TradingView Widgets
+                # Safely fetch stock prices and exchange symbol
+                if not filtered_df.empty and selected_stock_symbol in filtered_df['sym'].values:
+                    selected_exchange = filtered_df[filtered_df['sym'] == selected_stock_symbol]['ex'].values
+                    if len(selected_exchange) > 0:
+                        formatted_symbol = f"{selected_exchange[0]}:{selected_stock_symbol}"
+                        print(formatted_symbol)
+                        show_single_stock_widget(formatted_symbol)
+                    else:
+                        st.warning("Exchange information is missing for the selected stock symbol.")
+                else:
+                    st.warning(f"Stock symbol {selected_stock_symbol} not found in the filtered data.")
 
                 # Bar Chart
                 fig_bar = plot_bar_chart(filtered_df, selected_stock_symbol)
@@ -222,6 +234,13 @@ if st.session_state['authenticated']:
                         st.success(f"{selected_stock_symbol} added to watchlist.")
                 else:
                     st.warning("Watchlist is full. Please remove an existing stock to add a new one.")
+
+                # Ticker Tape
+                st.subheader("Watchlist Ticker Tape")
+                if watchlist:
+                    show_ticker_tape()
+                else:
+                    st.write("Your watchlist is empty.")
     
                 # Display Watchlist
                 st.subheader("Your Watchlist")
