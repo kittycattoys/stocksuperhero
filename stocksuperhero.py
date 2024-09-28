@@ -36,7 +36,7 @@ if not st.session_state['authenticated']:
         response = supabase.table('app_keys').select('key, login_timestamps, watchlist').eq('key', user_key).execute()
         if response.data:
             st.session_state['authenticated'] = True
-            st.success("Access Granted!")
+            #st.success("Access Granted!")
             current_timestamp = datetime.now().isoformat()
             timestamps = response.data[0].get('login_timestamps', [])
             timestamps.append(current_timestamp)
