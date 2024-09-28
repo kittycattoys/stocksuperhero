@@ -208,8 +208,7 @@ if st.session_state['authenticated']:
                 with col1:
                     # Display the company logo (left-aligned with a fixed width)
                     image_url = f"https://ttok.s3.us-west-2.amazonaws.com/{selected_stock_symbol}.svg"
-                    st.image(image_url, width=150, caption=selected_stock_symbol, use_column_width=False, image_class="rounded-image")
-                    st.markdown('<div class="col1"></div>', unsafe_allow_html=True)  # Apply custom class to col1
+                    st.markdown(f'<img src="{image_url}" width="150" class="rounded-image" alt="{selected_stock_symbol}">', unsafe_allow_html=True)
 
                 with col2:
                     # Display the sector and industry (aligned with the company name and symbol)
