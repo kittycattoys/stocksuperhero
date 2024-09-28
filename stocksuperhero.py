@@ -153,7 +153,7 @@ if st.session_state['authenticated']:
                 #Bar Chart
                 fig_bar = plot_bar_chart(filtered_df, selected_stock_symbol)
                 if fig_bar:
-                    st.plotly_chart(fig_bar, use_container_width=True)
+                    st.plotly_chart(fig_bar, use_container_width=True, config={'staticPlot': True, 'displayModeBar': False })
                 else:
                     st.write("No data available to display in the bar chart.")
 
