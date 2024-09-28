@@ -153,7 +153,12 @@ if st.session_state['authenticated']:
                 #Bar Chart
                 fig_bar = plot_bar_chart(filtered_df, selected_stock_symbol)
                 if fig_bar:
-                    st.plotly_chart(fig_bar, use_container_width=True, config={'staticPlot': True, 'displayModeBar': False })
+                    st.plotly_chart(fig_bar, use_container_width=True, config={
+                        'staticPlot': False,  # Allows for full screen and downloading image
+                        'displayModeBar': True,  # Show the modebar
+                        'modeBarButtonsToRemove': ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'autoScale', 'resetScale', 'zoomIn', 'zoomOut', 'resetViews'],  # Remove unwanted buttons
+                        'modeBarButtonsToAdd': ['drawline', 'drawopenpath', 'drawrect', 'drawcircle', 'eraseshape', 'togglehover', 'resetview'],  # Add desired buttons
+                    })
                 else:
                     st.write("No data available to display in the bar chart.")
 
