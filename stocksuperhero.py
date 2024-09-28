@@ -157,7 +157,7 @@ if st.session_state['authenticated']:
                         'staticPlot': False,  # Allows for full screen and downloading image
                         'displayModeBar': True,  # Show the modebar
                         'modeBarButtonsToRemove': ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'autoScale', 'resetScale', 'zoomIn', 'zoomOut', 'resetViews'],  # Remove unwanted buttons
-                        'modeBarButtonsToAdd': ['drawline', 'drawopenpath', 'drawrect', 'drawcircle', 'eraseshape', 'togglehover', 'resetview'],  # Add desired buttons
+                   
                     })
                 else:
                     st.write("No data available to display in the bar chart.")
