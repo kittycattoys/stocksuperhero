@@ -187,7 +187,6 @@ if st.session_state['authenticated']:
             df_dim_det = pd.DataFrame(response_dim_det.data)
             if not df_fact.empty:
                 # MAIN APP AREA - FACT AND DIM
-                # Inline CSS to limit the width of col1 to 150px and align everything left
                 st.markdown("""
                     <style>
                     .col1 {
@@ -197,6 +196,9 @@ if st.session_state['authenticated']:
                     .col2 {
                         float: left;
                         padding-left: 10px;
+                    }
+                    .rounded-image {
+                        border-radius: 15px;  /* Adjust the radius as needed */
                     }
                     </style>
                     """, unsafe_allow_html=True)
