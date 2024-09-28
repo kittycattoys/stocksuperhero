@@ -5,8 +5,8 @@ import plotly.graph_objects as go
 from supabase import create_client, Client
 from datetime import datetime
 from st_aggrid import AgGrid
-from functions.agstyler import PINLEFT, PRECISION_TWO, draw_grid 
-from functions.gauge import create_pie_chart 
+from functions.agstyler import PINLEFT, PRECISION_TWO, draw_grid
+from functions.gauge import create_pie_chart
 from functions.area import plot_area_chart
 from functions.bar import plot_bar_chart
 from functions.metric import plot_metric
@@ -31,7 +31,7 @@ if not st.session_state['authenticated']:
         submit_button = st.form_submit_button("Submit")
 
     if submit_button:
-        response = supabase.table('app_keys').select('key, login_timestamps').eq('key', user_key).execute()
+        response = supabase.table('app_keys').select('key, login_timestamps, watchlist').eq('key', user_key).execute()
         if response.data:
             st.session_state['authenticated'] = True
             st.success("Access Granted!")
@@ -40,9 +40,8 @@ if not st.session_state['authenticated']:
             timestamps.append(current_timestamp)
             supabase.table('app_keys').update({'login_timestamps': timestamps}).eq('key', user_key).execute()
 
-            # Store user_key in session_state
+            # Store user_key and watchlist in session_state
             st.session_state['user_key'] = user_key
-
             st.session_state['watchlist'] = response.data[0].get('watchlist', [])
         else:
             st.error("Invalid access key. The app is protected.")
@@ -50,7 +49,10 @@ else:
     st.title("Welcome Superhero")
 
 if st.session_state['authenticated']:
-    user_key = st.session_state.get('user_key') 
+    user_key = st.session_state.get('user_key')
+
+    # Ensure the watchlist is loaded in session state
+    watchlist = st.session_state.get('watchlist', [])
 
     if 'df' not in st.session_state:
         st.session_state['df'] = pd.DataFrame()
@@ -61,7 +63,7 @@ if st.session_state['authenticated']:
         st.error("Failed to fetch data from Supabase.")
     else:
         df_dim = pd.DataFrame(response_dim.data)
-   
+
     selected_stock_symbol = 'SBUX'
     filtered_df = pd.DataFrame()
 
@@ -154,22 +156,22 @@ if st.session_state['authenticated']:
         if response_fact.data:
             df_fact = pd.DataFrame(response_fact.data)
             if not df_fact.empty:
-                #MAIN APP AREA - FACT AND DIM
+                # MAIN APP AREA - FACT AND DIM
                 # Price
                 plot_area_chart(df_fact, selected_stock_symbol)
 
-                #Bar Chart
+                # Bar Chart
                 fig_bar = plot_bar_chart(filtered_df, selected_stock_symbol)
                 if fig_bar:
                     st.plotly_chart(fig_bar, use_container_width=True)
                 else:
                     st.write("No data available to display in the bar chart.")
 
-                #Metric
+                # Metric
                 plot_metric(df_fact, selected_stock_symbol)
 
                 # Add Watchlist Functionality
-                watchlist = st.session_state['watchlist']
+                watchlist = st.session_state.get('watchlist', [])
                 
                 # Check if the selected stock symbol is already in the watchlist
                 if any(item['symbol'] == selected_stock_symbol for item in watchlist):
