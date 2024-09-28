@@ -48,24 +48,36 @@ if not st.session_state['authenticated']:
 else:
     st.title("Welcome Superhero")
 
+# Function to reapply watchlist filter
+def apply_watchlist_filter():
+    if watchlist:
+        watchlist_symbols = [item['symbol'] for item in watchlist]
+        return df_dim[df_dim['sym'].isin(watchlist_symbols)]
+    else:
+        return pd.DataFrame()  # Blank dataframe if watchlist is empty
+
 if st.session_state['authenticated']:
     user_key = st.session_state.get('user_key')
 
     # Ensure the watchlist is loaded in session state
     watchlist = st.session_state.get('watchlist', [])
+    print(watchlist)
 
-    if 'df' not in st.session_state:
-        st.session_state['df'] = pd.DataFrame()
+   # Check if 'df_dim' is loaded and populated
+    if 'df_dim' not in st.session_state:
+        response_dim = supabase.table('dim').select('sym, spst, cn, ind, sec, ps').execute()
+        if response_dim.data is None:
+            st.error("Failed to fetch data from Supabase.")
+        else:
+            st.session_state['df_dim'] = pd.DataFrame(response_dim.data)
 
-    response_dim = supabase.table('dim').select('sym, spst, cn, ind, sec, ps').execute()
-    
-    if response_dim.data is None:
-        st.error("Failed to fetch data from Supabase.")
-    else:
-        df_dim = pd.DataFrame(response_dim.data)
+    df_dim = st.session_state['df_dim']
+
+    # Filter the dataframe by the watchlist initially on login
+    filtered_df = apply_watchlist_filter()
+
 
     selected_stock_symbol = 'SBUX'
-    filtered_df = pd.DataFrame()
 
     def filter_dataframe(df, selected_spst, selected_ind, selected_sec):
         if selected_spst:
@@ -119,7 +131,21 @@ if st.session_state['authenticated']:
                 "Select SPST Values", available_spst, default=st.session_state['selected_spst'], key="spst_multiselect"
             )
 
-        filtered_df = filter_dataframe(df_dim, st.session_state['selected_spst'], st.session_state['selected_ind'], st.session_state['selected_sec'])
+        # Button to clear all filters and reapply the watchlist
+        if st.button("Clear All Filters and Reapply Watchlist"):
+            # Clear the dropdown filters
+            st.session_state['selected_sec'] = []
+            st.session_state['selected_ind'] = []
+            st.session_state['selected_spst'] = []
+            # Reapply the watchlist filter
+            filtered_df = apply_watchlist_filter()    
+
+        # Only filter if dropdowns are updated; don't overwrite watchlist
+        if st.session_state['selected_spst'] or st.session_state['selected_ind'] or st.session_state['selected_sec']:
+            filtered_df = filter_dataframe(df_dim, st.session_state['selected_spst'], st.session_state['selected_ind'], st.session_state['selected_sec'])
+        else:
+            # If no filters are selected, keep showing the watchlist only
+            filtered_df = apply_watchlist_filter()
 
         if not filtered_df.empty:
             filtered_df['sym_cn'] = filtered_df['sym'] + " - " + filtered_df['cn']
