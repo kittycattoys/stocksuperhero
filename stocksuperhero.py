@@ -223,7 +223,7 @@ if st.session_state['authenticated']:
                         selected_exchange = filtered_df[filtered_df['sym'] == selected_stock_symbol]['ex'].values
                         if len(selected_exchange) > 0:
                             formatted_symbol = f"{selected_exchange[0]}:{selected_stock_symbol}"
-                            print(formatted_symbol)
+                            #print(formatted_symbol)
                             show_single_stock_widget(formatted_symbol)
                         else:
                             st.warning("Exchange information is missing for the selected stock symbol.")
