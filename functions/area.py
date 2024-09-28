@@ -83,7 +83,14 @@ def plot_area_chart(df_fact, selected_stock_symbol):
                 'spikemode': 'across', 
                 'spikecolor': 'red', 
                 'spikethickness': 1
-            }
+            },
+            xaxis={
+                'showspikes': True, 
+                'spikemode': 'across', 
+                'spikecolor': 'red', 
+                'spikethickness': 1
+            },
+            modebar=dict(remove=["zoom", "pan", "select2d", "lasso2d", "autoScale", "resetScale", "zoomIn", "zoomOut", "resetViews"])
         )
 
         st.plotly_chart(fig)

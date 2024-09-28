@@ -9,6 +9,7 @@ from functions.agstyler import PINLEFT, PRECISION_TWO, draw_grid
 from functions.gauge import create_pie_chart 
 from functions.area import plot_area_chart
 from functions.bar import plot_bar_chart
+from functions.metric import plot_metric
 
 # Set page configuration as the first Streamlit command
 st.set_page_config(layout="wide")
@@ -145,8 +146,20 @@ if st.session_state['authenticated']:
         if response_fact.data:
             df_fact = pd.DataFrame(response_fact.data)
             if not df_fact.empty:
-                # Area chart for stock prices
+                #MAIN APP AREA - FACT AND DIM
+                # Price
                 plot_area_chart(df_fact, selected_stock_symbol)
+
+                #Bar Chart
+                fig_bar = plot_bar_chart(filtered_df, selected_stock_symbol)
+                if fig_bar:
+                    st.plotly_chart(fig_bar, use_container_width=True)
+                else:
+                    st.write("No data available to display in the bar chart.")
+
+                #Metric
+                plot_metric(df_fact, selected_stock_symbol)
+
             else:
                 st.warning(f"No stock price data found for {selected_stock_symbol}.")
         else:
@@ -154,16 +167,7 @@ if st.session_state['authenticated']:
     else:
         st.warning("No data matches the selected filters.")
 
-    # Place the PS Metric Bar Chart
-    if not filtered_df.empty and 'sym' in filtered_df.columns and 'ps' in filtered_df.columns:
-        # Place the PS Metric Bar Chart
-        fig_bar = plot_bar_chart(filtered_df, selected_stock_symbol)
-        
-        if fig_bar:
-            st.plotly_chart(fig_bar, use_container_width=True)
-        else:
-            st.write("No data available to display in the bar chart.")
-
+    #GAUGES FROM DIM NOT FACT
     st.markdown(
         """
         <style>
