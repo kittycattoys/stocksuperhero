@@ -48,7 +48,8 @@ if not st.session_state['authenticated']:
         else:
             st.error("Invalid access key. The app is protected.")
 else:
-    st.title("Welcome Superhero")
+    #st.title("Welcome Superhero")
+    print("hi")
 
 # Function to reapply watchlist filter
 def apply_watchlist_filter():
