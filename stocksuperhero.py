@@ -27,9 +27,9 @@ if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
 if not st.session_state['authenticated']:
-    st.title("Access Protected Application")
+    #st.title("Access Protected Application")
     with st.form("access_form"):
-        user_key = st.text_input("Enter your app secret access key", type="password")
+        user_key = st.text_input("Enter Your SECRET ACCESS KEY", type="password")
         submit_button = st.form_submit_button("Submit")
 
     if submit_button:
