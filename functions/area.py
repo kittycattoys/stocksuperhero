@@ -95,6 +95,7 @@ def plot_area_chart(df_fact, selected_stock_symbol):
                 'tickmode': 'linear',
                 'tickfont': {'size': 10, 'color': 'grey'},
                 'dtick': 12, 
+                'range': [df_fact['dt_st'].min(), df_fact['dt_st'].max()],
             },
             modebar=dict(remove=["zoom", "pan", "select2d", "lasso2d", "autoScale", "resetScale", "zoomIn", "zoomOut", "resetViews"])
         )
