@@ -90,7 +90,7 @@ def plot_area_chart(df_fact, selected_stock_symbol):
                 'tickwidth': 0,
                 'tickcolor': 'grey',
                 'ticklen': 4,
-                'ticklabelposition': 'inside',
+                'ticklabelposition': 'inside top',
                 'ticksuffix': "%",
                 'tickprefix': "%",
                 'fixedrange': True,  # Add this line
