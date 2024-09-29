@@ -92,9 +92,11 @@ def plot_area_chart(df_fact, selected_stock_symbol):
                 'ticklen': 4,
                 'ticklabelposition': 'inside',
                 'fixedrange': True,  # Add this line
+                'zeroline': False,
                 #'range': [0, max(df_fact['p']) * 1.1],  # Add this line
             },
             xaxis={
+                'zeroline': False,
                 'showspikes': True, 
                 'spikemode': 'across', 
                 'spikecolor': 'red', 
