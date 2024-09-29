@@ -77,7 +77,7 @@ def plot_area_chart(df_fact, selected_stock_symbol):
             yaxis_title=None,
             showlegend=False, 
             margin=dict(l=0, r=0, t=0, b=0),
-            height=500,
+            height=400,
             hovermode='x',
             dragmode=False,
             yaxis={
@@ -95,7 +95,7 @@ def plot_area_chart(df_fact, selected_stock_symbol):
                 'spikethickness': 1,
                 'tickmode': 'linear',
                 'tickfont': {'size': 10, 'color': 'grey'},
-                'dtick': 12, 
+                'dtick': 36, 
                 'range': [df_fact['dt_st'].min(), df_fact['dt_st'].max()],
             },
             modebar=dict(remove=["zoom", "pan", "select2d", "lasso2d", "autoScale", "resetScale", "zoomIn", "zoomOut", "resetViews"]),

@@ -55,7 +55,7 @@ def plot_metric(df_fact, selected_stock_symbol):
     # Customize chart layout
     fig.update_layout(
         #title=f"{selected_stock_symbol} Stock Prices",
-        height=375,
+        height=400,
         xaxis_title=None,
         yaxis_title=None,
         showlegend=False, 
@@ -76,7 +76,7 @@ def plot_metric(df_fact, selected_stock_symbol):
             'spikethickness': 1,
             'tickmode': 'linear',
             'tickfont': {'size': 10, 'color': 'grey'},
-            'dtick': 12, 
+            'dtick': 36, 
         },
         modebar=dict(remove=["zoom", "pan", "select2d", "lasso2d", "autoScale", "resetScale", "zoomIn", "zoomOut", "resetViews"])
     )
