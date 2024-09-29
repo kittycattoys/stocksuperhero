@@ -22,7 +22,7 @@ def plot_bar_chart(filtered_df, selected_stock_symbol):
         # Customize layout
         fig_bar.update_layout(
             #title="PS Metric Bar Chart",
-            margin=dict(l=0, r=0, t=10, b=0),
+            margin=dict(l=0, r=0, t=0, b=0),
             xaxis={'fixedrange':True},
             yaxis={'fixedrange':True, 'ticklabelposition': 'inside',},
             height=500,

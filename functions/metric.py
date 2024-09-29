@@ -59,7 +59,7 @@ def plot_metric(df_fact, selected_stock_symbol):
         xaxis_title=None,
         yaxis_title=None,
         showlegend=False, 
-        margin=dict(l=0, r=0, t=10, b=0),
+        margin=dict(l=0, r=0, t=0, b=0),
         hovermode='x',
         dragmode=False,
         yaxis={
