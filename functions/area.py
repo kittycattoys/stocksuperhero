@@ -87,9 +87,9 @@ def plot_area_chart(df_fact, selected_stock_symbol):
                 'spikethickness': 1,
                 'automargin': False, 
                 'tickfont': {'size': 10, 'color': 'grey'},
-                'tickwidth': 1,
+                'tickwidth': 0,
                 'tickcolor': 'grey',
-                'ticklen': 1,
+                'ticklen': 4,
                 'ticklabelposition': 'inside',
                 'fixedrange': True,  # Add this line
                 #'range': [0, max(df_fact['p']) * 1.1],  # Add this line
