@@ -17,6 +17,35 @@ import streamlit.components.v1 as components
 # Set page configuration as the first Streamlit command
 st.set_page_config(layout="wide")
 
+# Custom CSS to remove horizontal padding and margin
+st.markdown("""
+    <style>
+    /* Remove padding and margin from the main container */
+    .main .block-container {
+        padding-left: 0rem;
+        padding-right: 0rem;
+    }
+
+    /* Remove padding from Plotly charts */
+    .stPlotlyChart .plotly {
+        margin-left: 0px !important;
+        margin-right: 0px !important;
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+
+    /* Remove padding from expanders and columns */
+    .streamlit-expander {
+        padding-left: 0rem !important;
+        padding-right: 0rem !important;
+    }
+    .stColumns {
+        padding-left: 0rem !important;
+        padding-right: 0rem !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 # Supabase connection details
 url = st.secrets["supabase"]["url"]
 key = st.secrets["supabase"]["key"]

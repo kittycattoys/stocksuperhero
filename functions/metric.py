@@ -1,11 +1,13 @@
 import plotly.graph_objects as go
 import streamlit as st
+import pandas as pd
 
 def plot_metric(df_fact, selected_stock_symbol):
     # Calculate min and max values for 'p' column
     min_p = df_fact['p'].min()
     max_p = df_fact['p'].max()
     
+    #df_fact['dt_st'] = pd.to_datetime(df_fact['dt_st']).dt.strftime("%b %y")
     # Create a Plotly figure for the area chart
     fig = go.Figure()
 
@@ -33,16 +35,21 @@ def plot_metric(df_fact, selected_stock_symbol):
                   x1=df_fact['dt_st'].max(),
                   y0=max_p, y1=max_p,
                   line=dict(color='red', width=2))
+    
+    # Calculate the middle index of the x-axis for positioning the annotations
+    mid_index = len(df_fact) // 2
+    mid_x = df_fact['dt_st'].iloc[mid_index]
 
-    # Add text annotations for min and max values
-    fig.add_annotation(x=df_fact['dt_st'].max(), y=min_p,
+    # Add text annotation for the min value
+    fig.add_annotation(x=mid_x, y=min_p,
                        text=f"Min: {min_p:.2f}",
-                       showarrow=False, xanchor='left', yanchor='bottom',
+                       showarrow=False, xanchor='center', yanchor='bottom',
                        font=dict(color='white'))
 
-    fig.add_annotation(x=df_fact['dt_st'].max(), y=max_p,
+    # Add text annotation for the max value
+    fig.add_annotation(x=mid_x, y=max_p,
                        text=f"Max: {max_p:.2f}",
-                       showarrow=False, xanchor='left', yanchor='top',
+                       showarrow=False, xanchor='center', yanchor='top',
                        font=dict(color='white'))
 
     # Customize chart layout
@@ -52,7 +59,7 @@ def plot_metric(df_fact, selected_stock_symbol):
         xaxis_title=None,
         yaxis_title=None,
         showlegend=False, 
-        margin=dict(l=20, r=20, t=40, b=20),
+        margin=dict(l=0, r=0, t=30, b=0),
         hovermode='x',
         dragmode=False,
         yaxis={
@@ -65,7 +72,11 @@ def plot_metric(df_fact, selected_stock_symbol):
             'showspikes': True, 
             'spikemode': 'across', 
             'spikecolor': 'red', 
-            'spikethickness': 1
+            #'ticktext': df_fact['dt_st_new'],  # Use the formatted dates for tick labels
+            'spikethickness': 1,
+            'tickmode': 'linear',
+            'tickfont': {'size': 10, 'color': 'grey'},
+            'dtick': 12, 
         },
         modebar=dict(remove=["zoom", "pan", "select2d", "lasso2d", "autoScale", "resetScale", "zoomIn", "zoomOut", "resetViews"])
     )

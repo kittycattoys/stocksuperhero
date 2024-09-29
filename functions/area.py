@@ -5,6 +5,8 @@ import streamlit as st
 def plot_area_chart(df_fact, selected_stock_symbol):
     if not df_fact.empty:
         # Plotting stock prices using Plotly
+        df_fact['dt_st'] = pd.to_datetime(df_fact['dt_st']).dt.strftime("%b %y").astype(str)
+
         fig = go.Figure()
 
         # Add the area chart for stock prices
@@ -49,8 +51,8 @@ def plot_area_chart(df_fact, selected_stock_symbol):
 
         # Add rectangles for reference areas
         df_rectangles = pd.DataFrame({
-            'start_date': ["May-31-2019", "Jan-31-2015"], 
-            'end_date': ["May-31-2022", "Jan-31-2018"], 
+            'start_date': ["May '19", "Jan '15"], 
+            'end_date': ["May '22", "Jan '18"], 
             'color': ['green', 'red'], 
             'label': ['Reference Area 1', 'Reference Area 2']
         })
@@ -74,7 +76,7 @@ def plot_area_chart(df_fact, selected_stock_symbol):
             xaxis_title=None,
             yaxis_title=None,
             showlegend=False, 
-            margin=dict(l=20, r=20, t=40, b=20),
+            margin=dict(l=0, r=0, t=30, b=0),
             height=500,
             hovermode='x',
             dragmode=False,
@@ -88,7 +90,10 @@ def plot_area_chart(df_fact, selected_stock_symbol):
                 'showspikes': True, 
                 'spikemode': 'across', 
                 'spikecolor': 'red', 
-                'spikethickness': 1
+                'spikethickness': 1,
+                'tickmode': 'linear',
+                'tickfont': {'size': 10, 'color': 'grey'},
+                'dtick': 12, 
             },
             modebar=dict(remove=["zoom", "pan", "select2d", "lasso2d", "autoScale", "resetScale", "zoomIn", "zoomOut", "resetViews"])
         )
@@ -96,3 +101,4 @@ def plot_area_chart(df_fact, selected_stock_symbol):
         st.plotly_chart(fig)
     else:
         st.warning(f"No stock price data found for {selected_stock_symbol}.")
+
