@@ -85,8 +85,14 @@ def plot_area_chart(df_fact, selected_stock_symbol):
                 'spikemode': 'across', 
                 'spikecolor': 'red', 
                 'spikethickness': 1,
-                'ticklabelposition': 'inside',
                 'automargin': True, 
+                'tickfont': {'size': 10, 'color': 'grey'},
+                'tickwidth': 1,
+                'tickcolor': 'grey',
+                'ticklen': 4,
+                'ticklabelposition': 'inside',
+                'fixedrange': True,  # Add this line
+                'range': [0, max(df_fact['p']) * 1.1],  # Add this line
             },
             xaxis={
                 'showspikes': True, 
