@@ -73,7 +73,6 @@ def plot_metric(df_fact, selected_stock_symbol):
             'showspikes': True, 
             'spikemode': 'across', 
             'spikecolor': 'red', 
-            #'ticktext': df_fact['dt_st_new'],  # Use the formatted dates for tick labels
             'spikethickness': 1,
             'tickmode': 'linear',
             'tickfont': {'size': 10, 'color': 'grey'},
