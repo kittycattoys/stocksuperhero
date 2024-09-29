@@ -4,16 +4,13 @@ from st_aggrid.shared import GridUpdateMode, JsCode
 
 MAX_TABLE_HEIGHT = 500
 
-
 def get_numeric_style_with_precision(precision: int) -> dict:
     return {"type": ["numericColumn", "customNumericFormat"], "precision": precision}
-
 
 PRECISION_ZERO = get_numeric_style_with_precision(0)
 PRECISION_ONE = get_numeric_style_with_precision(1)
 PRECISION_TWO = get_numeric_style_with_precision(2)
 PINLEFT = {"pinned": "left"}
-
 
 def draw_grid(
         df,
@@ -60,15 +57,23 @@ def draw_grid(
     )
 
 
-def highlight(color, condition):
+def highlight(values_with_colors):
+    # Create the JavaScript function for conditional formatting
+    conditions = []
+    for value, (bg_color, font_color) in values_with_colors.items():
+        conditions.append(f"""
+            if (params.value === '{value}') {{
+                return {{
+                    'backgroundColor': '{bg_color}',
+                    'color': '{font_color}'
+                }};
+            }}
+        """)
+    # Default return if no condition matches
     code = f"""
         function(params) {{
-            color = "{color}";
-            if ({condition}) {{
-                return {{
-                    'backgroundColor': color
-                }}
-            }}
+            {''.join(conditions)}
+            return params.value ? null : {{ 'backgroundColor': 'white', 'color': 'black' }};  // Default styles
         }};
     """
     return JsCode(code)

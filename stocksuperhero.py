@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 from supabase import create_client, Client
 from datetime import datetime
 from st_aggrid import AgGrid
-from functions.agstyler import PINLEFT, PRECISION_TWO, draw_grid
+from functions.agstyler import PINLEFT, PRECISION_TWO, draw_grid, highlight
 from functions.gauge import create_pie_chart
 from functions.area import plot_area_chart
 from functions.bar import plot_bar_chart
@@ -27,10 +27,10 @@ if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
 if not st.session_state['authenticated']:
-    #st.title("Access Protected Application")
+   # st.title("Access Protected Application")
     with st.form("access_form"):
-        user_key = st.text_input("Enter Your SECRET ACCESS KEY", type="password")
-        submit_button = st.form_submit_button("Submit")
+        user_key = st.text_input("ENTER YOUR SUPERHERO SECRET ACCESS KEY", type="password")
+        submit_button = st.form_submit_button("Verify Access Key Now")
 
     if submit_button:
         response = supabase.table('app_keys').select('key, login_timestamps, watchlist').eq('key', user_key).execute()
@@ -153,11 +153,22 @@ if st.session_state['authenticated']:
         if not filtered_df.empty:
             filtered_df['sym_cn'] = filtered_df['sym'] + " - " + filtered_df['cn']
             df = filtered_df
+            values_with_colors = {
+                "Top": ("lightgreen", "darkgreen"),
+                "High": ("lightyellow", "orange"),
+                "Low": ("lightcoral", "darkred"),
+                "Poor": ("lightblue", "blue")
+            }
+            highlight_function = highlight(values_with_colors)
+   
             formatter = {
                 'sym': ('Symbol', PINLEFT),
                 'ind': ('Industry', {'width': 140}),
                 'ps': ('P/S', {**PRECISION_TWO, 'width': 80}),
-            }
+                'spst': ('SPS Type', {
+                    'cellStyle': highlight_function  # Apply the highlight function here
+                    }),
+                }
             # Draw the grid with single selection and use checkbox as a boolean
             data = draw_grid(
                 df.head(100),
