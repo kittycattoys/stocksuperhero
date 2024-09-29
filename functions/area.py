@@ -90,7 +90,7 @@ def plot_area_chart(df_fact, selected_stock_symbol):
                 'tickwidth': 1,
                 'tickcolor': 'grey',
                 'ticklen': 1,
-                'ticklabelposition': 'outside',
+                'ticklabelposition': 'inside',
                 'fixedrange': True,  # Add this line
                 #'range': [0, max(df_fact['p']) * 1.1],  # Add this line
             },
