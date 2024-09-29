@@ -25,7 +25,7 @@ def plot_bar_chart(filtered_df, selected_stock_symbol):
             margin=dict(l=0, r=0, t=0, b=0),
             xaxis={'fixedrange':True},
             yaxis={'fixedrange':True, 'ticklabelposition': 'inside',},
-            height=500,
+            height=375,
             modebar=dict(remove=["zoom", "pan", "select2d", "lasso2d", "autoScale", "resetScale", "zoomIn", "zoomOut", "resetViews"])
         )
 

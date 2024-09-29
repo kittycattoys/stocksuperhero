@@ -55,12 +55,11 @@ def plot_metric(df_fact, selected_stock_symbol):
     # Customize chart layout
     fig.update_layout(
         #title=f"{selected_stock_symbol} Stock Prices",
-        height=500,
+        height=375,
         xaxis_title=None,
         yaxis_title=None,
         showlegend=False, 
         margin=dict(l=0, r=0, t=0, b=0),
-        padding=dict(l=0, r=0, t=0, b=0),
         hovermode='x',
         dragmode=False,
         yaxis={

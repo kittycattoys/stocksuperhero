@@ -77,7 +77,7 @@ def plot_area_chart(df_fact, selected_stock_symbol):
             yaxis_title=None,
             showlegend=False, 
             margin=dict(l=0, r=0, t=0, b=0),
-            height=500,
+            height=375,
             hovermode='x',
             dragmode=False,
             yaxis={
