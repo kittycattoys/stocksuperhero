@@ -101,4 +101,3 @@ def plot_area_chart(df_fact, selected_stock_symbol):
         st.plotly_chart(fig)
     else:
         st.warning(f"No stock price data found for {selected_stock_symbol}.")
-
