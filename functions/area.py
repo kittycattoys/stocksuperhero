@@ -84,7 +84,8 @@ def plot_area_chart(df_fact, selected_stock_symbol):
                 'showspikes': True, 
                 'spikemode': 'across', 
                 'spikecolor': 'red', 
-                'spikethickness': 1
+                'spikethickness': 1,
+                'ticklabelposition': 'inside',
             },
             xaxis={
                 'showspikes': True, 
