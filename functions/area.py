@@ -4,8 +4,8 @@ import streamlit as st
 
 def plot_area_chart(df_fact, selected_stock_symbol):
     if not df_fact.empty:
-        # Plotting stock prices using Plotly
-        #df_fact['dt_st'] = pd.to_datetime(df_fact['dt_st']).dt.strftime("%b %y").astype(str)
+        # Ensure 'dt_st' is a datetime object for proper plotting
+        df_fact['dt_st'] = pd.to_datetime(df_fact['dt_st'])
 
         fig = go.Figure()
 
@@ -51,8 +51,8 @@ def plot_area_chart(df_fact, selected_stock_symbol):
 
         # Add rectangles for reference areas
         df_rectangles = pd.DataFrame({
-            'start_date': ["May 19", "Jan 15"], 
-            'end_date': ["May 22", "Jan 18"], 
+            'start_date': [pd.Timestamp("2023-05-19"), pd.Timestamp("2023-01-15")], 
+            'end_date': [pd.Timestamp("2023-05-22"), pd.Timestamp("2023-01-18")], 
             'color': ['green', 'red'], 
             'label': ['Reference Area 1', 'Reference Area 2']
         })
@@ -72,7 +72,6 @@ def plot_area_chart(df_fact, selected_stock_symbol):
 
         # Customize layout
         fig.update_layout(
-            #title=f"{selected_stock_symbol} Stock Prices",
             xaxis_title=None,
             yaxis_title=None,
             showlegend=False, 
@@ -95,8 +94,8 @@ def plot_area_chart(df_fact, selected_stock_symbol):
                 'spikethickness': 1,
                 'tickmode': 'linear',
                 'tickfont': {'size': 10, 'color': 'grey'},
-                'dtick': 12, 
-                'range': [df_fact['dt_st'].min(), df_fact['dt_st'].max()],
+                'dtick': 'M1',  # Adjust to show monthly ticks
+                'range': [df_fact['dt_st'].min(), df_fact['dt_st'].max()],  # Set x-axis range
             },
             modebar=dict(remove=["zoom", "pan", "select2d", "lasso2d", "autoScale", "resetScale", "zoomIn", "zoomOut", "resetViews"]),
         )
