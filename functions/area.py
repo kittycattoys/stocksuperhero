@@ -51,8 +51,8 @@ def plot_area_chart(df_fact, selected_stock_symbol):
 
         # Add rectangles for reference areas
         df_rectangles = pd.DataFrame({
-            'start_date': ["May '19", "Jan '15"], 
-            'end_date': ["May '22", "Jan '18"], 
+            'start_date': ["May 19", "Jan 15"], 
+            'end_date': ["May 22", "Jan 18"], 
             'color': ['green', 'red'], 
             'label': ['Reference Area 1', 'Reference Area 2']
         })
