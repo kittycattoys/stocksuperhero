@@ -85,14 +85,14 @@ def plot_area_chart(df_fact, selected_stock_symbol):
                 'spikemode': 'across', 
                 'spikecolor': 'red', 
                 'spikethickness': 1,
-                'automargin': True, 
+                'automargin': False, 
                 'tickfont': {'size': 10, 'color': 'grey'},
                 'tickwidth': 1,
                 'tickcolor': 'grey',
-                'ticklen': 4,
-                'ticklabelposition': 'inside',
+                'ticklen': 1,
+                'ticklabelposition': 'outside',
                 'fixedrange': True,  # Add this line
-                'range': [0, max(df_fact['p']) * 1.1],  # Add this line
+                #'range': [0, max(df_fact['p']) * 1.1],  # Add this line
             },
             xaxis={
                 'showspikes': True, 
@@ -102,7 +102,7 @@ def plot_area_chart(df_fact, selected_stock_symbol):
                 'tickmode': 'linear',
                 'tickfont': {'size': 10, 'color': 'grey'},
                 'dtick': 36, 
-                'tick0': None,
+                'tick0': False,
                 'range': [min(df_fact['dt_st']), max(df_fact['dt_st'])],
             },
             modebar=dict(remove=["zoom", "pan", "select2d", "lasso2d", "autoScale", "resetScale", "zoomIn", "zoomOut", "resetViews"]),
