@@ -206,10 +206,10 @@ if st.session_state['authenticated']:
             filtered_df['sym_cn'] = filtered_df['sym'] + " - " + filtered_df['cn']
             df = filtered_df
             values_with_colors = {
-                "Top": ("lightgreen", "darkgreen"),
-                "High": ("lightyellow", "orange"),
-                "Low": ("lightcoral", "darkred"),
-                "Poor": ("lightblue", "blue")
+                "Top": ("#f25829", "black"),
+                "High": ("#f2a529", "black"),
+                "Low": ("#85e043", "black"),
+                "Poor": ("#2bad4e", "black")
             }
             highlight_function = highlight(values_with_colors)
    
