@@ -1,10 +1,10 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Function to display the TradingView widget for a single stock (with updated height)
+# Function to display the TradingView widget for a single stock (simplified version)
 def show_single_stock_widget(symbol, width=350, is_transparent=True, color_theme="dark", locale="en"):
     widget_code = f"""
-    <div style="display: flex; align-items: left; justify-content: left; float: left; margin-top: -52px; pointer-events: none; height: 150px;">
+    <div style="display: flex; align-items: left; justify-content: left; float: left; margin-top: -52px; pointer-events: none; height: 100px;">
     <div class="tradingview-widget-container">
       <div class="tradingview-widget-container__widget"></div>
       <div class="tradingview-widget-copyright">
@@ -13,12 +13,13 @@ def show_single_stock_widget(symbol, width=350, is_transparent=True, color_theme
         </a>
       </div>
       <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-      {{"symbol": "{symbol}",
-        "width": {width},
-        "height": 150,  # Set the height for the widget
-        "isTransparent": {"true" if is_transparent else "false"},
-        "colorTheme": "{color_theme}",
-        "locale": "{locale}"
+      {{
+      "symbol": "{symbol}",
+      "width": {width},
+      "height": {100},
+      "isTransparent": {"true" if is_transparent else "false"},
+      "colorTheme": "{color_theme}",
+      "locale": "{locale}"
       }}
       </script>
     </div>
