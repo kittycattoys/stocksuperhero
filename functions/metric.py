@@ -76,7 +76,7 @@ def plot_metric(df_fact, selected_stock_symbol):
             'ticklabelposition': 'inside top',
             'fixedrange': True,             # Disable zoom on the y-axis
             'zeroline': False,              # Remove the zero line
-            #'spikesnap': 'cursor',          # Make the spike snap to the cursor position
+            'spikesnap': 'cursor',          # Make the spike snap to the cursor position
             #'spikebgcolor': 'rgba(0, 0, 0, 0)',  # Transparent background for the spikeline
         },
         xaxis={
