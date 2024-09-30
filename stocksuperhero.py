@@ -247,6 +247,11 @@ if st.session_state['authenticated']:
                         padding: 0px !important;
                         margin: 0px !important;
                     }
+                    .col4 {
+                        float: right;
+                        padding: 0px !important;
+                        margin: 0px !important;
+                    }
                     .rounded-image {
                         border-radius: 15px;  /* Adjust the radius as needed */
                     }
@@ -268,6 +273,14 @@ if st.session_state['authenticated']:
                     # Apply the custom class to col2 for styling
                     st.markdown('<div class="col2"></div>', unsafe_allow_html=True)
 
+                col3, col4 = st.columns([1, 1], gap="small")  # Adjust ratio for the layout
+
+                with col3:
+                    # Display the company logo (left-aligned with a fixed width)
+                    #st.markdown(f'<img src="{image_url}" width="150" class="rounded-image" alt="{selected_stock_symbol}">', unsafe_allow_html=True)
+                    st.subheader(f"Price")
+                    
+                with col4:
                     # Real-time price widget
                     if not filtered_df.empty and selected_stock_symbol in filtered_df['sym'].values:
                         selected_exchange = filtered_df[filtered_df['sym'] == selected_stock_symbol]['ex'].values
@@ -278,7 +291,7 @@ if st.session_state['authenticated']:
                         else:
                             st.warning("Exchange information is missing for the selected stock symbol.")
                     else:
-                        st.warning(f"Stock symbol {selected_stock_symbol} not found in the filtered data.")
+                        st.warning(f"Stock symbol {selected_stock_symbol} not found in the filtered data.")        
 
                 plot_area_chart(df_fact, selected_stock_symbol)
                 
