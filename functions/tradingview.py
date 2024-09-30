@@ -3,6 +3,15 @@ import streamlit.components.v1 as components
 
 # Function to display the TradingView widget for a single stock (simplified version)
 def show_single_stock_widget(symbol, width=350, is_transparent=True, color_theme="dark", locale="en"):
+    css = """
+    <style>
+    .element-container {
+        height: 150px !important;  /* Override the height to 150px */
+        overflow: hidden;           /* Hide any overflow content */
+    }
+    </style>
+    """
+        
     widget_code = f"""
     <div style="display: flex; align-items: left; justify-content: left; float: left; margin-top: -52px; pointer-events: none; height: 100px;">
     <div class="tradingview-widget-container">
@@ -25,7 +34,7 @@ def show_single_stock_widget(symbol, width=350, is_transparent=True, color_theme
     </div>
     </div>   
     """
-    components.html(widget_code)
+    components.html(css + widget_code, height=200) 
 
 
 # Function to display the TradingView ticker tape widget
