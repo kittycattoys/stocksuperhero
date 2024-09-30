@@ -57,31 +57,48 @@ url = st.secrets["supabase"]["url"]
 key = st.secrets["supabase"]["key"]
 supabase: Client = create_client(url, key)
 
+def login_user(user_key):
+    """
+    Function to handle the login logic.
+    Takes the `user_key` as an argument.
+    """
+    response = supabase.table('app_keys').select('key, login_timestamps, watchlist').eq('key', user_key).execute()
+    if response.data:
+        st.session_state['authenticated'] = True
+        current_timestamp = datetime.now().isoformat()
+        timestamps = response.data[0].get('login_timestamps', [])
+        timestamps.append(current_timestamp)
+        supabase.table('app_keys').update({'login_timestamps': timestamps}).eq('key', user_key).execute()
+
+        # Store user_key and watchlist in session_state
+        st.session_state['user_key'] = user_key
+        st.session_state['watchlist'] = response.data[0].get('watchlist', [])
+        st.success("Access Granted!")
+    else:
+        st.error("Invalid access key. The app is protected.")
+
 # Check if user is authenticated
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
 if not st.session_state['authenticated']:
-   # st.title("Access Protected Application")
+    # st.title("Access Protected Application")
     with st.form("access_form"):
-        user_key = st.text_input("ENTER YOUR SUPERHERO SECRET ACCESS KEY", type="password")
-        submit_button = st.form_submit_button("Verify Access Key Now")
-
-    if submit_button:
-        response = supabase.table('app_keys').select('key, login_timestamps, watchlist').eq('key', user_key).execute()
-        if response.data:
-            st.session_state['authenticated'] = True
-            #st.success("Access Granted!")
-            current_timestamp = datetime.now().isoformat()
-            timestamps = response.data[0].get('login_timestamps', [])
-            timestamps.append(current_timestamp)
-            supabase.table('app_keys').update({'login_timestamps': timestamps}).eq('key', user_key).execute()
-
-            # Store user_key and watchlist in session_state
-            st.session_state['user_key'] = user_key
-            st.session_state['watchlist'] = response.data[0].get('watchlist', [])
-        else:
-            st.error("Invalid access key. The app is protected.")
+        user_key_input = st.text_input("Enter your Superhero Secret Access Key", type="password")
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            submit_button = st.form_submit_button("Verify Access Key Now")
+        
+        with col2:
+            demo_button = st.form_submit_button("Demo Login", help="Log in with a demo key.")
+    
+    # Handle button clicks
+    if submit_button and user_key_input:
+        login_user(user_key_input)  # Regular login with provided key
+    
+    if demo_button:
+        login_user("key")  # Demo login with hardcoded key
 else:
     #st.title("Welcome Superhero")
     print("hi")
