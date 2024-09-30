@@ -239,10 +239,13 @@ if st.session_state['authenticated']:
                     .col1 {
                         max-width: 150px !important;
                         float: left;
+                        padding: 0px !important;
+                        margin: 0px !important;
                     }
                     .col2 {
                         float: left;
-                        padding-left: 10px;
+                        padding: 0px !important;
+                        margin: 0px !important;
                     }
                     .rounded-image {
                         border-radius: 15px;  /* Adjust the radius as needed */

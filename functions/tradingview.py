@@ -6,8 +6,8 @@ def show_single_stock_widget(symbol, width=350, is_transparent=True, color_theme
     css = """
     <style>
     .element-container {
-        max-height: 50px !important;  /* Override the height to 150px */
-        overflow: hidden;           /* Hide any overflow content */
+        max-height: 30px !important; 
+        overflow: hidden; 
     }
     </style>
     """
@@ -25,7 +25,7 @@ def show_single_stock_widget(symbol, width=350, is_transparent=True, color_theme
       {{
       "symbol": "{symbol}",
       "width": {width},
-      "height": {50},
+      "height": {30},
       "isTransparent": {"true" if is_transparent else "false"},
       "colorTheme": "{color_theme}",
       "locale": "{locale}"
@@ -34,7 +34,7 @@ def show_single_stock_widget(symbol, width=350, is_transparent=True, color_theme
     </div>
     </div>   
     """
-    components.html(css + widget_code, height=50) 
+    components.html(css + widget_code, height=30) 
 
 
 # Function to display the TradingView ticker tape widget
