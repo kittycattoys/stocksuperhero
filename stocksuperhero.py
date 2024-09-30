@@ -247,7 +247,7 @@ if st.session_state['authenticated']:
                         padding: 0px !important;
                         margin: 0px !important;
                     }
-                    .col4 {
+                    .col3 {
                         float: right;
                         padding: 0px !important;
                         margin: 0px !important;
