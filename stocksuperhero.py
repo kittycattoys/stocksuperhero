@@ -267,7 +267,7 @@ if st.session_state['authenticated']:
 
                 with col2:
                     # Display the sector and industry (aligned with the company name and symbol)
-                    st.subheader(f"{df_dim_det['cn'].iloc[0]} - {selected_stock_symbol}")
+                    st.header(f"{df_dim_det['cn'].iloc[0]} - {selected_stock_symbol}")
                     # Display the company name and symbol
                     st.markdown(f"{df_dim_det['sec'].iloc[0]} - {df_dim_det['ind'].iloc[0]}")
                     # Apply the custom class to col2 for styling
