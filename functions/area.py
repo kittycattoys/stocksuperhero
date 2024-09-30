@@ -85,7 +85,7 @@ def plot_area_chart(df_fact, selected_stock_symbol):
                 'spikemode': 'toaxis',
                 'spikecolor': 'rgba(228, 233, 237, 1)',
                 'spikethickness': 1,
-                'spikedash': 'solid',
+                'spikedash': 'dash',
                 'automargin': True, 
                 'tickfont': {'size': 12, 'color': 'LightSteelBlue'},
                 'tickwidth': 1,
