@@ -67,16 +67,30 @@ def plot_metric(df_fact, selected_stock_symbol):
             'spikemode': 'across', 
             'spikecolor': 'red', 
             'spikethickness': 1,
-            'ticklabelposition': 'inside',
+            'automargin': True, 
+            'tickfont': {'size': 12, 'color': 'LightSteelBlue'},
+            'tickwidth': 1,
+            'tickcolor': 'LightSteelBlue',
+            'ticklen': 4,
+            'ticklabelposition': 'inside top',
+            #'ticksuffix': "%",
+            #'tickprefix': "%",
+            'fixedrange': True,  # Add this line
+            'zeroline': False,
+            #'range': [0, max(df_fact['p']) * 1.1],  # Add this line
         },
         xaxis={
+            'zeroline': False,
             'showspikes': True, 
             'spikemode': 'across', 
             'spikecolor': 'red', 
             'spikethickness': 1,
             'tickmode': 'linear',
-            'tickfont': {'size': 10, 'color': 'grey'},
+            'tickfont': {'size': 12, 'color': 'LightSteelBlue'},
+            'tickcolor': 'LightSteelBlue',
             'dtick': 36, 
+            'tick0': False,
+            'range': [min(df_fact['dt_st']), max(df_fact['dt_st'])],
         },
         modebar=dict(remove=["zoom", "pan", "select2d", "lasso2d", "autoScale", "resetScale", "zoomIn", "zoomOut", "resetViews"])
     )
