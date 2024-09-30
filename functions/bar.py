@@ -16,7 +16,7 @@ def plot_bar_chart(filtered_df, selected_stock_symbol):
 
         # Highlight selected symbol
         fig_bar.update_traces(
-            marker=dict(color=['orange' if sym == selected_stock_symbol else 'steelblue' for sym in filtered_df['sym']])
+            marker=dict(color=['orange' if sym == selected_stock_symbol else 'dodgerblue' for sym in filtered_df['sym']])
         )
 
         # Customize layout
