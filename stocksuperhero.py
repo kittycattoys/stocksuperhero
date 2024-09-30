@@ -19,7 +19,11 @@ st.set_page_config(layout="wide")
 
 st.markdown("""
     <style>
-    @media only screen and (max-width: 900px) {
+       .main .block-container {
+            max-width: 900px;
+        }
+            
+    @media only screen and (max-width: 750px) {
         /* Remove padding and margin from the main container */
         .main .block-container {
             padding-left: 0rem;
