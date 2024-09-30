@@ -65,7 +65,7 @@ def plot_metric(df_fact, selected_stock_symbol):
         yaxis={ 
             'showspikes': True,             # Enable spikelines
             'spikemode': 'toaxis',          # Spike to axis
-            'spikecolor': 'rgba(228, 233, 237, 0.4)',  # Red color with 0.4 opacity using rgba
+            'spikecolor': 'rgba(228, 233, 237, 1)',  # Red color with 0.4 opacity using rgba
             'spikethickness': 1,            # Spike line thickness
             'spikedash': 'solid',           # Type of spike line (can be 'solid', 'dot', 'dash')
             'automargin': True,             # Auto margins
@@ -83,7 +83,7 @@ def plot_metric(df_fact, selected_stock_symbol):
             'zeroline': False,
             'showspikes': True, 
             'spikemode': 'toaxis', 
-            'spikecolor': 'rgba(228, 233, 237, 0.4)',
+            'spikecolor': 'rgba(228, 233, 237, 1)',
             'spikedash': 'solid', 
             'spikethickness': 1,
             'tickmode': 'linear',
