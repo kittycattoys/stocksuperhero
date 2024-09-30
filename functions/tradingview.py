@@ -4,7 +4,7 @@ import streamlit.components.v1 as components
 # Function to display the TradingView widget for a single stock (simplified version)
 def show_single_stock_widget(symbol, width=350, is_transparent=True, color_theme="dark", locale="en"):
     widget_code = f"""
-    <div style="display: flex; align-items: left; justify-content: left; float: left; margin-top: -52px; pointer-events: none;">
+    <div style="display: flex; align-items: left; justify-content: left; float: left; margin-top: -52px; pointer-events: none; height: 100px;">
     <div class="tradingview-widget-container">
       <div class="tradingview-widget-container__widget"></div>
       <div class="tradingview-widget-copyright">
