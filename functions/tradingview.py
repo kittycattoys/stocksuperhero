@@ -8,7 +8,6 @@ def show_single_stock_widget(symbol, width=350, is_transparent=True, color_theme
     .element-container {
         max-height: 45px !important; 
         overflow: hidden; 
-        float: right !important;
     }
     </style>
     """

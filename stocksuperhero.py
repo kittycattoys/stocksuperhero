@@ -238,17 +238,14 @@ if st.session_state['authenticated']:
                     <style>
                     .col1 {
                         max-width: 150px !important;
-                        float: left;
                         padding: 0px !important;
                         margin: 0px !important;
                     }
                     .col2 {
-                        float: left;
                         padding: 0px !important;
                         margin: 0px !important;
                     }
                     .col3 {
-                        float: right;
                         padding: 0px !important;
                         margin: 0px !important;
                     }
