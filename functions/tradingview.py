@@ -13,7 +13,7 @@ def show_single_stock_widget(symbol, width=350, is_transparent=True, color_theme
     """
         
     widget_code = f"""
-    <div style="margin-top: -52px; margin-left: -10px; pointer-events: none;">
+    <div style="margin-top: -52px; margin-left: -30px; pointer-events: none;">
     <div class="tradingview-widget-container">
       <div class="tradingview-widget-container__widget"></div>
       <div class="tradingview-widget-copyright">
