@@ -258,7 +258,7 @@ if st.session_state['authenticated']:
                     </style>
                     """, unsafe_allow_html=True)
 
-                col1, col2 = st.columns([1, 7], gap="small")  # Adjust ratio for the layout
+                col1, col2, col3 = st.columns([1, 3, 3], gap="small")  # Adjust ratio for the layout
 
                 with col1:
                     # Display the company logo (left-aligned with a fixed width)
@@ -273,14 +273,7 @@ if st.session_state['authenticated']:
                     # Apply the custom class to col2 for styling
                     st.markdown('<div class="col2"></div>', unsafe_allow_html=True)
 
-                col3, col4 = st.columns([1, 7], gap="small")  # Adjust ratio for the layout
-
                 with col3:
-                    # Display the company logo (left-aligned with a fixed width)
-                    #st.markdown(f'<img src="{image_url}" width="150" class="rounded-image" alt="{selected_stock_symbol}">', unsafe_allow_html=True)
-                    st.subheader(f"Price")
-
-                with col4:
                     # Real-time price widget
                     if not filtered_df.empty and selected_stock_symbol in filtered_df['sym'].values:
                         selected_exchange = filtered_df[filtered_df['sym'] == selected_stock_symbol]['ex'].values
