@@ -73,7 +73,7 @@ def login_user(user_key):
         # Store user_key and watchlist in session_state
         st.session_state['user_key'] = user_key
         st.session_state['watchlist'] = response.data[0].get('watchlist', [])
-        st.success("Access Granted!")
+        #st.success("Access Granted!")
     else:
         st.error("Invalid access key. The app is protected.")
 
