@@ -246,7 +246,7 @@ if st.session_state['authenticated']:
                         margin: 0px !important;
                     }
                     .col3 {
-                        align-items: right !important;
+                        justify-content: right !important;
                         padding: 0px !important;
                         margin: 0px !important;
                     }
