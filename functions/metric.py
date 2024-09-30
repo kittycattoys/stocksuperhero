@@ -82,7 +82,7 @@ def plot_metric(df_fact, selected_stock_symbol):
         xaxis={
             'zeroline': False,
             'showspikes': True, 
-            'spikemode': 'across', 
+            'spikemode': 'toaxis', 
             'spikecolor': 'red', 
             'spikethickness': 1,
             'tickmode': 'linear',
