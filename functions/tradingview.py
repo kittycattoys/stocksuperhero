@@ -8,13 +8,12 @@ def show_single_stock_widget(symbol, width=350, is_transparent=True, color_theme
     .element-container {
         max-height: 45px !important; 
         overflow: hidden; 
-        padding-top: 20px !important;
     }
     </style>
     """
         
     widget_code = f"""
-    <div style="margin-top: -50px; margin-left: -26px; pointer-events: none;">
+    <div style="margin-top: -52px; margin-left: -26px; pointer-events: none;">
     <div class="tradingview-widget-container">
       <div class="tradingview-widget-container__widget"></div>
       <div class="tradingview-widget-copyright">
