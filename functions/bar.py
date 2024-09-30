@@ -24,8 +24,18 @@ def plot_bar_chart(filtered_df, selected_stock_symbol):
             #title="PS Metric Bar Chart",
             height=400,
             margin=dict(l=0, r=0, t=0, b=0),
-            xaxis={'fixedrange':True},
-            yaxis={'fixedrange':True, 'ticklabelposition': 'inside',},
+            xaxis={  
+                'fixedrange':True, 
+                'ticklabelposition': 'inside', 
+                'tickfont': {'size': 12, 'color': 'LightSteelBlue'},
+                'tickcolor': 'LightSteelBlue',
+                },
+            yaxis={
+                'fixedrange':True, 
+                'ticklabelposition': 'inside', 
+                'tickfont': {'size': 12, 'color': 'LightSteelBlue'},
+                'tickcolor': 'LightSteelBlue',
+                },
             modebar=dict(remove=["zoom", "pan", "select2d", "lasso2d", "autoScale", "resetScale", "zoomIn", "zoomOut", "resetViews"])
         )
 
