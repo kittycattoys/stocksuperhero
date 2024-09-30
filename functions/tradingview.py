@@ -6,7 +6,7 @@ def show_single_stock_widget(symbol, width=350, is_transparent=True, color_theme
     css = """
     <style>
     .element-container {
-        height: 150px !important;  /* Override the height to 150px */
+        max-height: 150px !important;  /* Override the height to 150px */
         overflow: hidden;           /* Hide any overflow content */
     }
     </style>
