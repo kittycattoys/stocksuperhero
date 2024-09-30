@@ -20,7 +20,7 @@ st.set_page_config(layout="wide")
 st.markdown("""
     <style>
        .main .block-container {
-            max-width: 1100px;
+            max-width: 1200px;
         }
             
     @media only screen and (max-width: 750px) {
