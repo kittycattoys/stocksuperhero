@@ -63,29 +63,27 @@ def plot_metric(df_fact, selected_stock_symbol):
         hovermode='x',
         dragmode=False,
         yaxis={ 
-            'showspikes': True,             # Enable spikelines
-            'spikemode': 'toaxis',          # Spike to axis
-            'spikecolor': 'rgba(228, 233, 237, 1)',  # Red color with 0.4 opacity using rgba
-            'spikethickness': 1,            # Spike line thickness
-            'spikedash': 'solid',           # Type of spike line (can be 'solid', 'dot', 'dash')
-            'automargin': True,             # Auto margins
+            'showspikes': True,    
+            'spikemode': 'toaxis',
+            'spikecolor': 'rgba(228, 233, 237, 1)',
+            'spikethickness': 1,
+            'spikedash': 'solid',
+            'automargin': True,
             'tickfont': {'size': 12, 'color': 'LightSteelBlue'},
             'tickwidth': 1,
             'tickcolor': 'LightSteelBlue',
             'ticklen': 4,
             'ticklabelposition': 'inside top',
-            'fixedrange': True,             # Disable zoom on the y-axis
-            'zeroline': False,              # Remove the zero line
-            #'spikesnap': 'cursor',          # Make the spike snap to the cursor position
-            #'spikebgcolor': 'rgba(0, 0, 0, 0)',  # Transparent background for the spikeline
+            'fixedrange': True,
+            'zeroline': False,
         },
         xaxis={
             'zeroline': False,
-            'showspikes': True, 
-            'spikemode': 'toaxis', 
+            'showspikes': True,    
+            'spikemode': 'toaxis',
             'spikecolor': 'rgba(228, 233, 237, 1)',
-            'spikedash': 'solid', 
             'spikethickness': 1,
+            'spikedash': 'solid',
             'tickmode': 'linear',
             'tickfont': {'size': 12, 'color': 'LightSteelBlue'},
             'tickcolor': 'LightSteelBlue',
