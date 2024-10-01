@@ -5,7 +5,7 @@ import streamlit as st
 def plot_area_chart(df_fact, selected_stock_symbol):
     if not df_fact.empty:
         # Plotting stock prices using Plotly
-        #df_fact['dt_st'] = pd.to_datetime(df_fact['dt_st']).dt.strftime("%b %y").astype(str)
+        df_fact['dt_st'] = pd.to_datetime(df_fact['dt_st']).astype(str)
 
         fig = go.Figure()
 
