@@ -100,14 +100,16 @@ if not st.session_state['authenticated']:
             submit_button = st.form_submit_button("Verify Access Key Now")
         
         with col2:
-            demo_button = st.form_submit_button("Demo Login", help="Log in with a demo key.")
+            #demo_button = st.form_submit_button("Demo Login", help="Log in with a demo key.")
+            st.subheader(f"Demo Coming Soon")
+
     
     # Handle button clicks
     if submit_button and user_key_input:
         login_user(user_key_input)  # Regular login with provided key
     
-    if demo_button:
-        login_user("key")  # Demo login with hardcoded key
+    #if demo_button:
+    #    login_user("key")  # Demo login with hardcoded key
 else:
     #st.title("Welcome Superhero")
     print("hi")
