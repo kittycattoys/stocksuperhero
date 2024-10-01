@@ -57,6 +57,15 @@ url = st.secrets["supabase"]["url"]
 key = st.secrets["supabase"]["key"]
 supabase: Client = create_client(url, key)
 
+# Function to switch tables based on time period selection
+def get_fact_table_for_period(period):
+    if period == "Daily":
+        return 'fact_daily'
+    elif period == "Weekly":
+        return 'fact'
+    else:
+        return 'fact_monthly'
+
 def login_user(user_key):
     """
     Function to handle the login logic.
@@ -193,7 +202,11 @@ if st.session_state['authenticated']:
             st.session_state['selected_ind'] = []
             st.session_state['selected_spst'] = []
             # Reapply the watchlist filter
-            filtered_df = apply_watchlist_filter()    
+            filtered_df = apply_watchlist_filter()  
+
+        # Add the radio button for time period selection
+        time_period = st.radio("Select Time Period", options=["Daily", "Weekly", "Monthly"], index=2)
+        fact_table = get_fact_table_for_period(time_period)  
 
         # Only filter if dropdowns are updated; don't overwrite watchlist
         if st.session_state['selected_spst'] or st.session_state['selected_ind'] or st.session_state['selected_sec']:
@@ -245,7 +258,7 @@ if st.session_state['authenticated']:
     if selected_stock_symbol:
         # Fetch stock prices based on selected stock symbol
         response_dim_det = supabase.table('dim_det').select('sym, spst, cn, ind, sec, ps, ex').eq('sym', selected_stock_symbol).execute()
-        response_fact = supabase.table('fact').select('dt_st, p, high_tp, mid_tp, low_tp').eq('sym', selected_stock_symbol).execute()
+        response_fact = supabase.table(fact_table).select('dt_st, p, high_tp, mid_tp, low_tp').eq('sym', selected_stock_symbol).execute()
         if response_fact.data:
             df_fact = pd.DataFrame(response_fact.data)
             df_dim_det = pd.DataFrame(response_dim_det.data)
