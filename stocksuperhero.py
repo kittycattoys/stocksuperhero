@@ -259,7 +259,7 @@ if st.session_state['authenticated']:
     if selected_stock_symbol:
         # Fetch stock prices based on selected stock symbol
         response_dim_det = supabase.table('dim_det').select('sym, spst, cn, ind, sec, ps, ex').eq('sym', selected_stock_symbol).execute()
-        response_fact = supabase.table(fact_table).select('dt_st, p, high_tp, mid_tp, low_tp').eq('sym', selected_stock_symbol).execute()
+        response_fact = supabase.table(fact_table).select('dt_st, p, high_tp, mid_tp, low_tp, ps').eq('sym', selected_stock_symbol).execute()
         if response_fact.data:
             df_fact = pd.DataFrame(response_fact.data)
             df_dim_det = pd.DataFrame(response_dim_det.data)
