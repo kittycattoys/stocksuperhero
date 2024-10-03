@@ -4,8 +4,8 @@ import pandas as pd
 
 def plot_metric(df_fact, selected_stock_symbol):
     # Calculate min and max values for 'p' column
-    min_p = df_fact['p'].min()
-    max_p = df_fact['p'].max()
+    min_p = df_fact['ps'].min()
+    max_p = df_fact['ps'].max()
     
     #df_fact['dt_st'] = pd.to_datetime(df_fact['dt_st']).dt.strftime("%b %y")
     # Create a Plotly figure for the area chart
@@ -14,7 +14,7 @@ def plot_metric(df_fact, selected_stock_symbol):
     # Add the area chart for stock prices
     fig.add_trace(go.Scatter(
         x=df_fact['dt_st'], 
-        y=df_fact['p'],
+        y=df_fact['ps'],
         fill='tozeroy',  # Fill to the horizontal axis
         mode='lines',
         line=dict(color='hotpink'),
