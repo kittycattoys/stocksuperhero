@@ -14,6 +14,7 @@ from functions.tradingview import show_single_stock_widget, show_ticker_tape
 from functions.macd import plot_macd_chart
 import yfinance as yf
 import streamlit.components.v1 as components
+from time import sleep
 
 # Set page configuration as the first Streamlit command
 st.set_page_config(layout="wide")
@@ -260,8 +261,8 @@ if st.session_state['authenticated']:
     if selected_stock_symbol:
         # Fetch stock prices based on selected stock symbol
         response_dim_det = supabase.table('dim_det').select('sym, spst, cn, ind, sec, ps, ex').eq('sym', selected_stock_symbol).execute()
-        response_fact = supabase.table(fact_table).select('dt_st, p, high_tp, mid_tp, low_tp, ps').eq('sym', selected_stock_symbol).execute()
-        response_tech = supabase.table('stocksuperhero_tech_monthly').select('dt_st, p, rsi, md, mds, mdh').eq('sym', selected_stock_symbol).execute()
+        response_fact = supabase.table(fact_table).select('sym, dt_st, p, high_tp, mid_tp, low_tp, ps').eq('sym', selected_stock_symbol).execute()
+        response_tech = supabase.table('stocksuperhero_tech_monthly').select('sym, dt_st, p, rsi, md, mds, mdh').eq('sym', selected_stock_symbol).execute()
         if response_fact.data:
             df_fact = pd.DataFrame(response_fact.data)
             df_dim_det = pd.DataFrame(response_dim_det.data)
@@ -319,7 +320,8 @@ if st.session_state['authenticated']:
 
                 plot_area_chart(df_fact, selected_stock_symbol)
 
-                #plot_macd_chart(df_tech)
+                
+                plot_macd_chart(df_tech)
                 
                 # Bar Chart
                 fig_bar = plot_bar_chart(filtered_df, selected_stock_symbol)
