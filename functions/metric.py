@@ -2,24 +2,38 @@ import plotly.graph_objects as go
 import streamlit as st
 import pandas as pd
 
-def plot_metric(df_fact, selected_stock_symbol):
+def plot_metric(df_fact, selected_stock_symbol, df_text_labels):
     # Calculate min and max values for 'p' column
     min_p = df_fact['ps'].min()
     max_p = df_fact['ps'].max()
     
-    #df_fact['dt_st'] = pd.to_datetime(df_fact['dt_st']).dt.strftime("%b %y")
     # Create a Plotly figure for the area chart
     fig = go.Figure()
 
-    # Add the area chart for stock prices
+
+    # Add the area chart for stock prices with text labels
     fig.add_trace(go.Scatter(
         x=df_fact['dt_st'], 
         y=df_fact['ps'],
         fill='tozeroy',  # Fill to the horizontal axis
-        mode='lines',
+        mode='lines+text',  # Include text mode for labels
         line=dict(color='hotpink'),
         hoverinfo='x+y',
-        name=f"{selected_stock_symbol} Prices"
+        name=f"{selected_stock_symbol} Prices",
+        #text=[f"{y:.2f}" if i % step == 0 else "" for i, y in enumerate(df_fact['ps'])],
+        #textposition='top right',  # Position the text above the line
+        #textfont=dict(size=12, color='white')  # Customize text font and color
+    ))
+
+    # Adding text labels at specific x-axis values from df_text_labels
+    fig.add_trace(go.Scatter(
+        x=df_text_labels['dt_st'],  # Use the dt_st values from df_text_labels
+        y=df_text_labels['ps_last'],  # Use ps values from df_text_labels for labels
+        mode='text',  # Display only text labels
+        text=[f"{y:.2f}" for y in df_text_labels['ps_last']],  # Format text for ps values
+        textposition='top right',  # Customize the position of the text
+        textfont=dict(size=12, color='white'),  # Customize text font and color
+        showlegend=False  # Disable legend for this trace
     ))
 
     # Add a horizontal reference line for the min value
@@ -54,7 +68,6 @@ def plot_metric(df_fact, selected_stock_symbol):
 
     # Customize chart layout
     fig.update_layout(
-        #title=f"{selected_stock_symbol} Stock Prices",
         height=400,
         xaxis_title=None,
         yaxis_title=None,

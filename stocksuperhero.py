@@ -260,7 +260,7 @@ if st.session_state['authenticated']:
     # This block is now outside the expander
     if selected_stock_symbol:
         # Fetch stock prices based on selected stock symbol
-        response_dim_det = supabase.table('dim_det').select('sym, spst, cn, ind, sec, ps, ex').eq('sym', selected_stock_symbol).execute()
+        response_dim_det = supabase.table('dim_det').select('sym, spst, cn, ind, sec, ps, ex, trend_json_ss').eq('sym', selected_stock_symbol).execute()
         response_fact = supabase.table(fact_table).select('sym, dt_st, p, high_tp, mid_tp, low_tp, ps').eq('sym', selected_stock_symbol).execute()
         response_tech = supabase.table('stocksuperhero_tech_monthly').select('sym, dt_st, p, rsi, md, mds, mdh').eq('sym', selected_stock_symbol).execute()
         if response_fact.data:
@@ -268,6 +268,15 @@ if st.session_state['authenticated']:
             df_dim_det = pd.DataFrame(response_dim_det.data)
             df_tech = pd.DataFrame(response_tech.data)
             if not df_fact.empty:
+                # Extract the first row's 'trend_json_ss' data (if there's only one row per stock symbol)
+                json_data = df_dim_det.loc[0, 'trend_json_ss']
+
+                # Step 3: Convert the extracted JSON data into a dataframe
+                df_text_labels = pd.json_normalize(json_data)
+
+                # Step 4: Display the resulting df_text_labels
+                print(df_text_labels)
+
                 # MAIN APP AREA - FACT AND DIM
                 st.markdown("""
                     <style>
@@ -331,7 +340,8 @@ if st.session_state['authenticated']:
                     st.write("No data available to display in the bar chart.")
 
                 # Metric
-                plot_metric(df_fact, selected_stock_symbol)
+                df_text_labels['dt_st'] = pd.to_datetime(df_text_labels['dt_st']).dt.strftime("%b %y").astype(str)
+                plot_metric(df_fact, selected_stock_symbol, df_text_labels)
 
                 # Add Watchlist Functionality
                 watchlist = st.session_state.get('watchlist', [])

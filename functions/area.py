@@ -5,8 +5,7 @@ import streamlit as st
 def plot_area_chart(df_fact, selected_stock_symbol):
     if not df_fact.empty:
         # Plotting stock prices using Plotly
-        df_fact['dt_st'] = pd.to_datetime(df_fact['dt_st']).dt.strftime("%b-%d-%Y").astype(str)
-
+        df_fact['dt_st'] = pd.to_datetime(df_fact['dt_st']).dt.strftime("%b %y").astype(str)
 
         fig = go.Figure()
 
@@ -50,29 +49,6 @@ def plot_area_chart(df_fact, selected_stock_symbol):
             hovertemplate='<b>Date:</b> %{x}<br><b>Low TP:</b> %{y}<extra></extra>'
         ))
 
-        '''
-        # Add rectangles for reference areas
-        df_rectangles = pd.DataFrame({
-            'start_date': ["May 19", "Jan 15"], 
-            'end_date': ["May 22", "Jan 18"], 
-            'color': ['green', 'red'], 
-            'label': ['Reference Area 1', 'Reference Area 2']
-        })
-
-        # Loop through the dataframe to dynamically add vertical rectangles
-        for index, row in df_rectangles.iterrows():
-            fig.add_vrect(
-                x0=row['start_date'], 
-                x1=row['end_date'],
-                fillcolor=row['color'], 
-                opacity=0.2,
-                layer="below", 
-                line_width=0,
-                annotation_text=row['label'], 
-                annotation_position="top left"
-            )
-        '''
-        
         # Customize layout
         fig.update_layout(
             #title=f"{selected_stock_symbol} Stock Prices",
