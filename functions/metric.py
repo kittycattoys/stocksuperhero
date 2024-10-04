@@ -28,11 +28,11 @@ def plot_metric(df_fact, selected_stock_symbol, df_text_labels):
     # Adding text labels at specific x-axis values from df_text_labels
     fig.add_trace(go.Scatter(
         x=df_text_labels['dt_st'],  # Use the dt_st values from df_text_labels
-        y=df_text_labels['ps_last'],  # Use ps values from df_text_labels for labels
+        y=df_text_labels['ps_first'],  # Use ps values from df_text_labels for labels
         mode='text',  # Display only text labels
-        text=[f"{y:.2f}" for y in df_text_labels['ps_last']],  # Format text for ps values
+        text=[f"{y:.2f}" for y in df_text_labels['ps_first']],  # Format text for ps values
         textposition='top right',  # Customize the position of the text
-        textfont=dict(size=12, color='white'),  # Customize text font and color
+        textfont=dict(size=15, color='white', weight='bold'),  # Customize text font and color
         showlegend=False  # Disable legend for this trace
     ))
 
