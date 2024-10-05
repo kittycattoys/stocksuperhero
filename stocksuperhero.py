@@ -261,7 +261,7 @@ if st.session_state['authenticated']:
     if selected_stock_symbol:
         # Fetch stock prices based on selected stock symbol
         response_dim_det = supabase.table('dim_det').select('sym, spst, cn, ind, sec, ps, ex, trend_json_ss').eq('sym', selected_stock_symbol).execute()
-        response_fact = supabase.table(fact_table).select('sym, dt_st, p, high_tp, mid_tp, low_tp, ps').eq('sym', selected_stock_symbol).execute()
+        response_fact = supabase.table(fact_table).select('sym, dt_st, p, high_tp, mid_tp, low_tp, ps, sps, pe, eps, dy, d').eq('sym', selected_stock_symbol).execute()
         response_tech = supabase.table('stocksuperhero_tech_monthly').select('sym, dt_st, p, rsi, md, mds, mdh').eq('sym', selected_stock_symbol).execute()
         if response_fact.data:
             df_fact = pd.DataFrame(response_fact.data)
@@ -341,7 +341,9 @@ if st.session_state['authenticated']:
 
                 # Metric
                 df_text_labels['dt_st'] = pd.to_datetime(df_text_labels['dt_st']).dt.strftime("%b %y").astype(str)
-                plot_metric(df_fact, selected_stock_symbol, df_text_labels)
+                plot_metric(df_fact, selected_stock_symbol, df_text_labels, metric_type='ps', metric_color='hotpink')
+                plot_metric(df_fact, selected_stock_symbol, df_text_labels, metric_type='pe', metric_color='orange')
+                plot_metric(df_fact, selected_stock_symbol, df_text_labels, metric_type='dy', metric_color='purple')
 
                 # Add Watchlist Functionality
                 watchlist = st.session_state.get('watchlist', [])

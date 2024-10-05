@@ -2,37 +2,37 @@ import plotly.graph_objects as go
 import streamlit as st
 import pandas as pd
 
-def plot_metric(df_fact, selected_stock_symbol, df_text_labels):
-    # Calculate min and max values for 'p' column
-    min_p = df_fact['ps'].min()
-    max_p = df_fact['ps'].max()
+def plot_metric(df_fact, selected_stock_symbol, df_text_labels, metric_type, metric_color):
+    # Calculate min and max values for the selected metric
+    min_p = df_fact[metric_type].min()
+    max_p = df_fact[metric_type].max()
     
+    # Adjust the y-axis range: scale down the minimum and adjust the maximum
+    y_min = min_p * 0.9
+    y_max = max_p * 1.05
+
     # Create a Plotly figure for the area chart
     fig = go.Figure()
-
 
     # Add the area chart for stock prices with text labels
     fig.add_trace(go.Scatter(
         x=df_fact['dt_st'], 
-        y=df_fact['ps'],
+        y=df_fact[metric_type],
         fill='tozeroy',  # Fill to the horizontal axis
         mode='lines+text',  # Include text mode for labels
-        line=dict(color='hotpink'),
+        line=dict(color=metric_color),
         hoverinfo='x+y',
         name=f"{selected_stock_symbol} Prices",
-        #text=[f"{y:.2f}" if i % step == 0 else "" for i, y in enumerate(df_fact['ps'])],
-        #textposition='top right',  # Position the text above the line
-        #textfont=dict(size=12, color='white')  # Customize text font and color
     ))
 
     # Adding text labels at specific x-axis values from df_text_labels
     fig.add_trace(go.Scatter(
         x=df_text_labels['dt_st'],  # Use the dt_st values from df_text_labels
-        y=df_text_labels['ps_first'],  # Use ps values from df_text_labels for labels
+        y=df_text_labels[f"{metric_type}_first"],  # Use ps values from df_text_labels for labels
         mode='text',  # Display only text labels
-        text=[f"{y:.2f}" for y in df_text_labels['ps_first']],  # Format text for ps values
+        text=[f"{y:.2f}" for y in df_text_labels[f"{metric_type}_first"]],  # Format text for ps values
         textposition='top right',  # Customize the position of the text
-        textfont=dict(size=15, color='white', weight='bold'),  # Customize text font and color
+        textfont=dict(size=15, color='white'),  # Customize text font and color
         showlegend=False  # Disable legend for this trace
     ))
 
@@ -66,7 +66,7 @@ def plot_metric(df_fact, selected_stock_symbol, df_text_labels):
                        showarrow=False, xanchor='center', yanchor='top',
                        font=dict(color='white'))
 
-    # Customize chart layout
+    # Customize chart layout with dynamic y-axis range
     fig.update_layout(
         height=400,
         xaxis_title=None,
@@ -89,6 +89,7 @@ def plot_metric(df_fact, selected_stock_symbol, df_text_labels):
             'ticklabelposition': 'inside top',
             'fixedrange': True,
             'zeroline': False,
+            'range': [y_min, y_max],  # Set the dynamic y-axis range
         },
         xaxis={
             'zeroline': False,
