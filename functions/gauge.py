@@ -17,8 +17,8 @@ def create_pie_chart(df_dim_det, metric_type, metric_color):
     hand_angle = np.pi * (1 - (max(min_value, min(max_value, current_value)) - min_value) / (max_value - min_value))
 
     # Fixed font sizes
-    annotation_font_size = 24
-    quadrant_label_font_size = 12
+    annotation_font_size = 22
+    quadrant_label_font_size = 16
 
     fig = go.Figure(
         data=[go.Pie(
@@ -32,7 +32,7 @@ def create_pie_chart(df_dim_det, metric_type, metric_color):
         )],
         layout=go.Layout(
             showlegend=False,
-            margin=dict(b=0, t=20, l=20, r=20),
+            margin=dict(b=0, t=40, l=50, r=50),
             width=350,
             height=350,
             paper_bgcolor=plot_bgcolor,
@@ -44,34 +44,35 @@ def create_pie_chart(df_dim_det, metric_type, metric_color):
                     showarrow=False,
                     font=dict(size=annotation_font_size)
                 ),
+
                 # Adding quadrant labels
                 go.layout.Annotation(
-                    text=f"<b>{df_dim_det['ps8'].iloc[0]}</b>",
-                    x=0.5, y=0.9, xanchor="center", yanchor="bottom",
+                    text=f"<b>{df_dim_det['psmax'].iloc[0]}x</b>",
+                    x=1.1, y=0.5, xanchor="center", yanchor="bottom",
                     font=dict(size=quadrant_label_font_size, color="#f25829"),
                     showarrow=False
                 ),
                 go.layout.Annotation(
-                    text="<b>High</b>",
-                    x=0.8, y=0.9, xanchor="center", yanchor="bottom",
+                    text=f"<b>{df_dim_det['ps8'].iloc[0]}x</b>",
+                    x=1, y=0.8, xanchor="center", yanchor="bottom",
                     font=dict(size=quadrant_label_font_size, color="#f2a529"),
                     showarrow=False
                 ),
                 go.layout.Annotation(
-                    text="<b>Medium</b>",
-                    x=0.9, y=0.4, xanchor="center", yanchor="bottom",
+                    text=f"<b>{df_dim_det['ps5'].iloc[0]}x</b>",
+                    x=0.5, y=0.95, xanchor="center", yanchor="bottom",
                     font=dict(size=quadrant_label_font_size, color="#eff229"),
                     showarrow=False
                 ),
                 go.layout.Annotation(
-                    text="<b>Low</b>",
-                    x=0.5, y=0.2, xanchor="center", yanchor="bottom",
+                    text=f"<b>{df_dim_det['ps2'].iloc[0]}x</b>",
+                    x=0, y=0.8, xanchor="center", yanchor="bottom",
                     font=dict(size=quadrant_label_font_size, color="#85e043"),
                     showarrow=False
                 ),
                 go.layout.Annotation(
-                    text="<b>Very Low</b>",
-                    x=0.1, y=0.2, xanchor="center", yanchor="bottom",
+                    text=f"<b>{df_dim_det['psmin'].iloc[0]}x</b>",
+                    x=-0.1, y=0.5, xanchor="center", yanchor="bottom",
                     font=dict(size=quadrant_label_font_size, color="#2bad4e"),
                     showarrow=False
                 )
@@ -81,14 +82,14 @@ def create_pie_chart(df_dim_det, metric_type, metric_color):
                     type="circle",
                     x0=0.48, x1=0.52,
                     y0=0.48, y1=0.52,
-                    fillcolor="#333",
-                    line_color="#333",
+                    fillcolor="yellow",
+                    line_color="yellow",
                 ),
                 go.layout.Shape(
                     type="line",
                     x0=0.5, x1=0.5 + hand_length * np.cos(hand_angle),
                     y0=0.5, y1=0.5 + hand_length * np.sin(hand_angle),
-                    line=dict(color="#333", width=4)
+                    line=dict(color="yellow", width=4)
                 )
             ],
             xaxis=dict(visible=False),

@@ -260,7 +260,7 @@ if st.session_state['authenticated']:
     # This block is now outside the expander
     if selected_stock_symbol:
         # Fetch stock prices based on selected stock symbol
-        response_dim_det = supabase.table('dim_det').select('sym, spst, cn, ind, sec, ps, ps8, ex, trend_json_ss').eq('sym', selected_stock_symbol).execute()
+        response_dim_det = supabase.table('dim_det').select('sym, spst, cn, ind, sec, ps, psmin, ps2, ps5, ps8, psmax, psn, pst, ex, trend_json_ss').eq('sym', selected_stock_symbol).execute()
         response_fact = supabase.table(fact_table).select('sym, dt_st, p, high_tp, mid_tp, low_tp, ps, sps, pe, eps, dy, d').eq('sym', selected_stock_symbol).execute()
         response_tech = supabase.table('stocksuperhero_tech_monthly').select('sym, dt_st, p, rsi, md, mds, mdh').eq('sym', selected_stock_symbol).execute()
         if response_fact.data:
@@ -327,7 +327,7 @@ if st.session_state['authenticated']:
                     else:
                         st.warning(f"Stock symbol {selected_stock_symbol} not found in the filtered data.")        
 
-                plot_area_chart(df_fact, selected_stock_symbol)
+                plot_area_chart(df_fact, selected_stock_symbol, df_text_labels, metric_type='p', metric_color='dodgerblue')
 
                 
                 plot_macd_chart(df_tech)
