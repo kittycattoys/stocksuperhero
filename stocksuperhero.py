@@ -260,7 +260,7 @@ if st.session_state['authenticated']:
     # This block is now outside the expander
     if selected_stock_symbol:
         # Fetch stock prices based on selected stock symbol
-        response_dim_det = supabase.table('dim_det').select('sym, spst, cn, ind, sec, ps, ex, trend_json_ss').eq('sym', selected_stock_symbol).execute()
+        response_dim_det = supabase.table('dim_det').select('sym, spst, cn, ind, sec, ps, ps8, ex, trend_json_ss').eq('sym', selected_stock_symbol).execute()
         response_fact = supabase.table(fact_table).select('sym, dt_st, p, high_tp, mid_tp, low_tp, ps, sps, pe, eps, dy, d').eq('sym', selected_stock_symbol).execute()
         response_tech = supabase.table('stocksuperhero_tech_monthly').select('sym, dt_st, p, rsi, md, mds, mdh').eq('sym', selected_stock_symbol).execute()
         if response_fact.data:
@@ -345,6 +345,51 @@ if st.session_state['authenticated']:
                 plot_metric(df_fact, selected_stock_symbol, df_text_labels, metric_type='pe', metric_color='orange')
                 plot_metric(df_fact, selected_stock_symbol, df_text_labels, metric_type='dy', metric_color='purple')
 
+                #GAUGES FROM DIM NOT FACT
+                st.markdown(
+                    """
+                    <style>
+                    /* Add your CSS styles here */
+                    .element-container {
+                        display: flex;
+                        justify-content: center;
+                    }
+                    </style>
+                    """, 
+                    unsafe_allow_html=True
+                )
+
+                # Layout for charts
+                col1, col2 = st.columns(2)
+
+                # First row of charts
+                with col1:
+                    st.write("<div style='text-align: center; margin-bottom: 0;'>", unsafe_allow_html=True)
+                    fig1 = create_pie_chart(df_dim_det, metric_type='ps', metric_color='hotpink')
+                    st.plotly_chart(fig1, use_container_width=False, config={'displayModeBar': False})
+                    st.write("</div>", unsafe_allow_html=True)
+
+                with col2:
+                    st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
+                    fig2 = create_pie_chart(df_dim_det, metric_type='ps', metric_color='hotpink')
+                    st.plotly_chart(fig2, use_container_width=False, config={'displayModeBar': False})
+                    st.write("</div>", unsafe_allow_html=True)
+
+                # Second row of charts
+                col3, col4 = st.columns(2)
+
+                with col3:
+                    st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
+                    fig3 = create_pie_chart(df_dim_det, metric_type='ps', metric_color='hotpink')
+                    st.plotly_chart(fig3, use_container_width=False, config={'displayModeBar': False})
+                    st.write("</div>", unsafe_allow_html=True)
+
+                with col4:
+                    st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
+                    fig4 = create_pie_chart(df_dim_det, metric_type='ps', metric_color='hotpink')
+                    st.plotly_chart(fig4, use_container_width=False, config={'displayModeBar': False})
+                    st.write("</div>", unsafe_allow_html=True)
+
                 # Add Watchlist Functionality
                 watchlist = st.session_state.get('watchlist', [])
                 
@@ -397,48 +442,3 @@ if st.session_state['authenticated']:
             st.error(f"Failed to fetch data for {selected_stock_symbol}.")
     else:
         st.warning("No data matches the selected filters.")
-
-    #GAUGES FROM DIM NOT FACT
-    st.markdown(
-        """
-        <style>
-        /* Add your CSS styles here */
-        .element-container {
-            display: flex;
-            justify-content: center;
-        }
-        </style>
-        """, 
-        unsafe_allow_html=True
-    )
-
-    # Layout for charts
-    col1, col2 = st.columns(2)
-
-    # First row of charts
-    with col1:
-        st.write("<div style='text-align: center; margin-bottom: 0;'>", unsafe_allow_html=True)
-        fig1 = create_pie_chart()
-        st.plotly_chart(fig1, use_container_width=False, config={'displayModeBar': False})
-        st.write("</div>", unsafe_allow_html=True)
-
-    with col2:
-        st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
-        fig2 = create_pie_chart()
-        st.plotly_chart(fig2, use_container_width=False, config={'displayModeBar': False})
-        st.write("</div>", unsafe_allow_html=True)
-
-    # Second row of charts
-    col3, col4 = st.columns(2)
-
-    with col3:
-        st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
-        fig3 = create_pie_chart()
-        st.plotly_chart(fig3, use_container_width=False, config={'displayModeBar': False})
-        st.write("</div>", unsafe_allow_html=True)
-
-    with col4:
-        st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
-        fig4 = create_pie_chart()
-        st.plotly_chart(fig4, use_container_width=False, config={'displayModeBar': False})
-        st.write("</div>", unsafe_allow_html=True)

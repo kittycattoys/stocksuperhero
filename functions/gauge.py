@@ -1,21 +1,21 @@
 import numpy as np
 import plotly.graph_objects as go
 
-# Define the background color and quadrant colors
-plot_bgcolor = "rgba(255, 255, 255, 0)"
-quadrant_colors = [plot_bgcolor, "#f25829", "#f2a529", "#85e043", "#2bad4e"]
-quadrant_text = ["", "<b>Very high</b>", "<b>High</b>", "<b>Medium</b>", "<b>Low</b>", "<b>Very low</b>"]
-n_quadrants = len(quadrant_colors) - 1
-
-# Set the current value and limits
-current_value = 19.0
-min_value = 0
-max_value = 50
-hand_length = np.sqrt(2) / 4
-hand_angle = np.pi * (1 - (max(min_value, min(max_value, current_value)) - min_value) / (max_value - min_value))
-
 # Function to create the pie chart
-def create_pie_chart():
+def create_pie_chart(df_dim_det, metric_type, metric_color):
+    # Define the background color and quadrant colors
+    plot_bgcolor = "rgba(255, 255, 255, 0)"
+    quadrant_colors = [plot_bgcolor, "#f25829", "#f2a529", "#85e043", "#2bad4e"]
+    quadrant_text = ["", "<b>Very High</b>", "<b>High</b>", "<b>Medium</b>", "<b>Low</b>", "<b>Very low</b>"]
+    n_quadrants = len(quadrant_colors) - 1
+
+    # Set the current value and limits
+    current_value = 19.0
+    min_value = 0
+    max_value = 50
+    hand_length = np.sqrt(2) / 4
+    hand_angle = np.pi * (1 - (max(min_value, min(max_value, current_value)) - min_value) / (max_value - min_value))
+
     # Fixed font sizes
     annotation_font_size = 24
     quadrant_label_font_size = 12
@@ -38,7 +38,7 @@ def create_pie_chart():
             paper_bgcolor=plot_bgcolor,
             annotations=[
                 go.layout.Annotation(
-                    text=f"<b>Price / Sales</b><br><b>{current_value}x</b>",
+                    text=f"<b>Price / Sales</b><br><b>{df_dim_det['ps'].iloc[0]}x</b>",
                     x=0.5, xanchor="center", xref="paper",
                     y=0.25, yanchor="bottom", yref="paper",
                     showarrow=False,
@@ -46,7 +46,7 @@ def create_pie_chart():
                 ),
                 # Adding quadrant labels
                 go.layout.Annotation(
-                    text="<b>Very High</b>",
+                    text=f"<b>{df_dim_det['ps8'].iloc[0]}</b>",
                     x=0.5, y=0.9, xanchor="center", yanchor="bottom",
                     font=dict(size=quadrant_label_font_size, color="#f25829"),
                     showarrow=False
