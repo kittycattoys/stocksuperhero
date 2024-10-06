@@ -260,7 +260,7 @@ if st.session_state['authenticated']:
     # This block is now outside the expander
     if selected_stock_symbol:
         # Fetch stock prices based on selected stock symbol
-        response_dim_det = supabase.table('dim_det').select('sym, spst, cn, ind, sec, ps, psmin, ps2, ps5, ps8, psmax, psn, pst, ex, trend_json_ss').eq('sym', selected_stock_symbol).execute()
+        response_dim_det = supabase.table('dim_det').select('sym, spst, cn, ind, sec, ps, sps, psmin, ps2, ps5, ps8, psmax, psn, pst, pe, eps, pemin, pe2, pe5, pe8, pemax, pen, pet, dy, d, dymin, dy2, dy5, dy8, dymax, dyn, dyt, ex, trend_json_ss').eq('sym', selected_stock_symbol).execute()
         response_fact = supabase.table(fact_table).select('sym, dt_st, p, high_tp, mid_tp, low_tp, ps, sps, pe, eps, dy, d').eq('sym', selected_stock_symbol).execute()
         response_tech = supabase.table('stocksuperhero_tech_monthly').select('sym, dt_st, p, rsi, md, mds, mdh').eq('sym', selected_stock_symbol).execute()
         if response_fact.data:
@@ -373,7 +373,7 @@ if st.session_state['authenticated']:
 
                 with col2:
                     st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
-                    fig2 = create_pie_chart(df_dim_det, metric_type='ps', metric_color='hotpink')
+                    fig2 = create_pie_chart(df_dim_det, metric_type='pe', metric_color='hotpink')
                     st.plotly_chart(fig2, use_container_width=False, config={'displayModeBar': False}, key="chart2")
                     st.write("</div>", unsafe_allow_html=True)
 
@@ -382,7 +382,7 @@ if st.session_state['authenticated']:
 
                 with col3:
                     st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
-                    fig3 = create_pie_chart(df_dim_det, metric_type='ps', metric_color='hotpink')
+                    fig3 = create_pie_chart(df_dim_det, metric_type='dy', metric_color='hotpink')
                     st.plotly_chart(fig3, use_container_width=False, config={'displayModeBar': False}, key="chart3")
                     st.write("</div>", unsafe_allow_html=True)
 
