@@ -10,14 +10,14 @@ def create_pie_chart(df_dim_det, metric_type, metric_color):
     n_quadrants = len(quadrant_colors) - 1
 
     # Set the current value and limits
-    current_value = 19.0
+    current_value = df_dim_det[f'{metric_type}n'].iloc[0]
     min_value = 0
-    max_value = 50
+    max_value = 180
     hand_length = np.sqrt(2) / 4
     hand_angle = np.pi * (1 - (max(min_value, min(max_value, current_value)) - min_value) / (max_value - min_value))
 
     # Fixed font sizes
-    annotation_font_size = 22
+    annotation_font_size = 24
     quadrant_label_font_size = 16
 
     fig = go.Figure(
@@ -38,41 +38,41 @@ def create_pie_chart(df_dim_det, metric_type, metric_color):
             paper_bgcolor=plot_bgcolor,
             annotations=[
                 go.layout.Annotation(
-                    text=f"<b>Price / Sales</b><br><b>{df_dim_det['ps'].iloc[0]}x</b>",
+                    text=f"<b>{metric_type} {df_dim_det[f'{metric_type}t'].iloc[0]}</b><br><b>{df_dim_det[metric_type].iloc[0]}x</b>",
                     x=0.5, xanchor="center", xref="paper",
-                    y=0.25, yanchor="bottom", yref="paper",
+                    y=0.23, yanchor="bottom", yref="paper",
                     showarrow=False,
                     font=dict(size=annotation_font_size)
                 ),
 
                 # Adding quadrant labels
                 go.layout.Annotation(
-                    text=f"<b>{df_dim_det['psmax'].iloc[0]}x</b>",
-                    x=1.1, y=0.5, xanchor="center", yanchor="bottom",
+                    text=f"<b>{df_dim_det[f'{metric_type}max'].iloc[0]}x</b>",
+                    x=1.13, y=0.43, xanchor="center", yanchor="bottom",
                     font=dict(size=quadrant_label_font_size, color="#f25829"),
                     showarrow=False
                 ),
                 go.layout.Annotation(
-                    text=f"<b>{df_dim_det['ps8'].iloc[0]}x</b>",
+                    text=f"<b>{df_dim_det[f'{metric_type}8'].iloc[0]}x</b>",
                     x=1, y=0.8, xanchor="center", yanchor="bottom",
                     font=dict(size=quadrant_label_font_size, color="#f2a529"),
                     showarrow=False
                 ),
                 go.layout.Annotation(
-                    text=f"<b>{df_dim_det['ps5'].iloc[0]}x</b>",
+                    text=f"<b>{df_dim_det[f'{metric_type}5'].iloc[0]}x</b>",
                     x=0.5, y=0.95, xanchor="center", yanchor="bottom",
                     font=dict(size=quadrant_label_font_size, color="#eff229"),
                     showarrow=False
                 ),
                 go.layout.Annotation(
-                    text=f"<b>{df_dim_det['ps2'].iloc[0]}x</b>",
+                    text=f"<b>{df_dim_det[f'{metric_type}2'].iloc[0]}x</b>",
                     x=0, y=0.8, xanchor="center", yanchor="bottom",
                     font=dict(size=quadrant_label_font_size, color="#85e043"),
                     showarrow=False
                 ),
                 go.layout.Annotation(
-                    text=f"<b>{df_dim_det['psmin'].iloc[0]}x</b>",
-                    x=-0.1, y=0.5, xanchor="center", yanchor="bottom",
+                    text=f"<b>{df_dim_det[f'{metric_type}min'].iloc[0]}x</b>",
+                    x=-0.13, y=0.43, xanchor="center", yanchor="bottom",
                     font=dict(size=quadrant_label_font_size, color="#2bad4e"),
                     showarrow=False
                 )
@@ -80,8 +80,8 @@ def create_pie_chart(df_dim_det, metric_type, metric_color):
             shapes=[
                 go.layout.Shape(
                     type="circle",
-                    x0=0.48, x1=0.52,
-                    y0=0.48, y1=0.52,
+                    x0=0.49, x1=0.51,
+                    y0=0.49, y1=0.51,
                     fillcolor="yellow",
                     line_color="yellow",
                 ),
@@ -89,7 +89,7 @@ def create_pie_chart(df_dim_det, metric_type, metric_color):
                     type="line",
                     x0=0.5, x1=0.5 + hand_length * np.cos(hand_angle),
                     y0=0.5, y1=0.5 + hand_length * np.sin(hand_angle),
-                    line=dict(color="yellow", width=4)
+                    line=dict(color="yellow", width=3)
                 )
             ],
             xaxis=dict(visible=False),

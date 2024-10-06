@@ -353,6 +353,8 @@ if st.session_state['authenticated']:
                     .element-container {
                         display: flex;
                         justify-content: center;
+                        margin: 0px !important;
+                        padding: 0px !important;
                     }
                     </style>
                     """, 
