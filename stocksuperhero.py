@@ -366,13 +366,13 @@ if st.session_state['authenticated']:
                 with col1:
                     st.write("<div style='text-align: center; margin-bottom: 0;'>", unsafe_allow_html=True)
                     fig1 = create_pie_chart(df_dim_det, metric_type='ps', metric_color='hotpink')
-                    st.plotly_chart(fig1, use_container_width=False, config={'displayModeBar': False})
+                    st.plotly_chart(fig1, use_container_width=False, config={'displayModeBar': False}, key="chart1")
                     st.write("</div>", unsafe_allow_html=True)
 
                 with col2:
                     st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
                     fig2 = create_pie_chart(df_dim_det, metric_type='ps', metric_color='hotpink')
-                    st.plotly_chart(fig2, use_container_width=False, config={'displayModeBar': False})
+                    st.plotly_chart(fig2, use_container_width=False, config={'displayModeBar': False}, key="chart2")
                     st.write("</div>", unsafe_allow_html=True)
 
                 # Second row of charts
@@ -381,13 +381,13 @@ if st.session_state['authenticated']:
                 with col3:
                     st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
                     fig3 = create_pie_chart(df_dim_det, metric_type='ps', metric_color='hotpink')
-                    st.plotly_chart(fig3, use_container_width=False, config={'displayModeBar': False})
+                    st.plotly_chart(fig3, use_container_width=False, config={'displayModeBar': False}, key="chart3")
                     st.write("</div>", unsafe_allow_html=True)
 
                 with col4:
                     st.write("<div style='text-align: center;'>", unsafe_allow_html=True)
                     fig4 = create_pie_chart(df_dim_det, metric_type='ps', metric_color='hotpink')
-                    st.plotly_chart(fig4, use_container_width=False, config={'displayModeBar': False})
+                    st.plotly_chart(fig4, use_container_width=False, config={'displayModeBar': False}, key="chart4")
                     st.write("</div>", unsafe_allow_html=True)
 
                 # Add Watchlist Functionality
