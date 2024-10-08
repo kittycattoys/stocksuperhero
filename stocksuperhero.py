@@ -1,9 +1,10 @@
 import streamlit as st
-import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
+import numpy as np
 from supabase import create_client, Client
 from datetime import datetime
+from functools import partial
+import plotly.graph_objects as go
 from st_aggrid import AgGrid
 from functions.agstyler import PINLEFT, PRECISION_TWO, draw_grid, highlight
 from functions.gauge import create_pie_chart
@@ -19,45 +20,11 @@ from time import sleep
 # Set page configuration as the first Streamlit command
 st.set_page_config(layout="wide")
 
-st.markdown("""
-    <style>
-       .main .block-container {
-            max-width: 1200px;
-        }
-            
-    @media only screen and (max-width: 750px) {
-        /* Remove padding and margin from the main container */
-        .main .block-container {
-            padding-left: 0rem;
-            padding-right: 0rem;
-        }
-
-        /* Remove padding from Plotly charts */
-        .stPlotlyChart .plotly {
-            margin-left: 0px !important;
-            margin-right: 0px !important;
-            padding-left: 0px !important;
-            padding-right: 0px !important;
-        }
-
-        /* Remove padding from expanders and columns */
-        .streamlit-expander {
-            padding-left: 0rem !important;
-            padding-right: 0rem !important;
-        }
-
-        .stColumns {
-            padding-left: 0rem !important;
-            padding-right: 0rem !important;
-        }
-    }
-    </style>
-""", unsafe_allow_html=True)
-
 # Supabase connection details
 url = st.secrets["supabase"]["url"]
 key = st.secrets["supabase"]["key"]
 supabase: Client = create_client(url, key)
+selected_stock_symbol = 'SBUX'
 
 # Function to switch tables based on time period selection
 def get_fact_table_for_period(period):
@@ -69,200 +36,195 @@ def get_fact_table_for_period(period):
         return 'fact_monthly'
 
 def login_user(user_key):
-    """
-    Function to handle the login logic.
-    Takes the `user_key` as an argument.
-    """
-    response = supabase.table('app_keys').select('key, login_timestamps, watchlist').eq('key', user_key).execute()
+    response = supabase.table('app_keys').select('watchlist').eq('key', user_key).execute()
+    print('login response')
+    print(response)
+    print(response.data)
     if response.data:
+        st.toast('Your login was successful!', icon='🔓')
         st.session_state['authenticated'] = True
         current_timestamp = datetime.now().isoformat()
         timestamps = response.data[0].get('login_timestamps', [])
         timestamps.append(current_timestamp)
         supabase.table('app_keys').update({'login_timestamps': timestamps}).eq('key', user_key).execute()
-
-        # Store user_key and watchlist in session_state
         st.session_state['user_key'] = user_key
         st.session_state['watchlist'] = response.data[0].get('watchlist', [])
-        #st.success("Access Granted!")
+        st.rerun()  # Force rerun to apply login
     else:
-        st.error("Invalid access key. The app is protected.")
+        st.error("Invalid access key.")
 
-# Check if user is authenticated
+# Function to filter dataframe
+def filter_dataframe(df, selected_pst, selected_ind, selected_sec):
+    if selected_pst:
+        df = df[df['pst'].isin(selected_pst)]
+    if selected_ind:
+        df = df[df['ind'].isin(selected_ind)]
+    if selected_sec:
+        df = df[df['sec'].isin(selected_sec)]
+    return df
+
+def update_dropdowns(df, selected_sec):
+    available_sec = df['sec'].unique().tolist()
+
+    # Update industries based on selected sectors
+    if selected_sec:
+        available_ind = df[df['sec'].isin(selected_sec)]['ind'].unique().tolist()
+    else:
+        available_ind = df['ind'].unique().tolist()
+
+    available_pst = df['pst'].unique().tolist()
+    return available_pst, available_ind, available_sec
+
+def on_pst_change(arg):
+    st.toast(f"First Toast: {arg}")
+    if arg == "sec":
+        st.toast(f"Confirmed Sec? {arg}")
+    elif arg == "ind":
+        st.toast(f"Confirmed Ind? {arg}")
+    else: 
+        st.toast(f"Confirmed Other? {arg}")
+
+# Authentication check
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
 if not st.session_state['authenticated']:
-    # st.title("Access Protected Application")
-    with st.form("access_form"):
-        user_key_input = st.text_input("Enter your Superhero Secret Access Key", type="password")
-        col1, col2 = st.columns([1, 1])
-        
-        with col1:
+    with st.expander("Login", expanded=True):
+        with st.form("access_form"):
+            user_key_input = st.text_input("Enter Access Key", type="password")
             submit_button = st.form_submit_button("Verify Access Key Now")
-        
-        with col2:
-            #demo_button = st.form_submit_button("Demo Login", help="Log in with a demo key.")
-            st.subheader(f"Demo Coming Soon")
-
-    # Handle button clicks
-    if submit_button and user_key_input:
-        login_user(user_key_input)  # Regular login with provided key
-        
-    #if demo_button:
-    #    login_user("key")  # Demo login with hardcoded key
+        if submit_button and user_key_input:
+            login_user(user_key_input)
 else:
-    #st.title("Welcome Superhero")
-    print("hi")
-
-# Function to reapply watchlist filter
-def apply_watchlist_filter():
-    if watchlist:
-        watchlist_symbols = [item['symbol'] for item in watchlist]
-        return df_dim[df_dim['sym'].isin(watchlist_symbols)]
-    else:
-        return pd.DataFrame()  # Blank dataframe if watchlist is empty
-
-if st.session_state['authenticated']:
     user_key = st.session_state.get('user_key')
-
     # Ensure the watchlist is loaded in session state
     watchlist = st.session_state.get('watchlist', [])
-    print(watchlist)
-
-   # Check if 'df_dim' is loaded and populated
+    
+    # Ensure 'df_dim' is loaded
     if 'df_dim' not in st.session_state:
         response_dim = supabase.table('dim').select('sym, cn, ind, sec, ps, pst, dy, dyt, pe, pet, ex').execute()
-        if response_dim.data is None:
-            st.error("Failed to fetch data from Supabase.")
-        else:
-            st.session_state['df_dim'] = pd.DataFrame(response_dim.data)
-
+        st.session_state['df_dim'] = pd.DataFrame(response_dim.data)
+    
     df_dim = st.session_state['df_dim']
 
-    # Filter the dataframe by the watchlist initially on login
-    filtered_df = apply_watchlist_filter()
-
-
-    selected_stock_symbol = 'SBUX'
-
-    def filter_dataframe(df, selected_pst, selected_ind, selected_sec):
-        if selected_pst:
-            df = df[df['pst'].isin(selected_pst)]
-        if selected_ind:
-            df = df[df['ind'].isin(selected_ind)]
-        if selected_sec:
-            df = df[df['sec'].isin(selected_sec)]
-        return df
-
-    def update_dropdowns(df, selected_pst, selected_ind, selected_sec):
-        available_pst = df['pst'].unique().tolist()
-        available_sec = df['sec'].unique().tolist()
-
-        if selected_sec:
-            filtered_df = df[df['sec'].isin(selected_sec)]
-            available_ind = filtered_df['ind'].unique().tolist()
-        else:
-            available_ind = df['ind'].unique().tolist()
-
-        return available_pst, available_ind, available_sec, df
-
-    if 'selected_pst' not in st.session_state:
-        st.session_state['selected_pst'] = []
-    if 'selected_ind' not in st.session_state:
-        st.session_state['selected_ind'] = []
+    # Initialize session state for filters
     if 'selected_sec' not in st.session_state:
         st.session_state['selected_sec'] = []
+    if 'selected_ind' not in st.session_state:
+        st.session_state['selected_ind'] = []
+    if 'selected_pst' not in st.session_state:
+        st.session_state['selected_pst'] = []
 
-    available_pst, available_ind, available_sec, filtered_df = update_dropdowns(
-        df_dim, st.session_state['selected_pst'], st.session_state['selected_ind'], st.session_state['selected_sec']
-    )
+    # Get updated dropdowns
+    available_pst, available_ind, available_sec = update_dropdowns(df_dim, st.session_state['selected_sec'])
 
-    # Create an expander for dropdowns and table
-    with st.expander("Filter Options and Data Table", expanded=True):
+    # Filter options inside an expander
+    with st.expander("Filter Options", expanded=True):
         col1, col2, col3 = st.columns(3)
 
-        # Filtering options
         with col1:
             st.session_state['selected_sec'] = st.multiselect(
-                "Select Sector", available_sec, default=st.session_state['selected_sec'], key="sector_multiselect"
+                "Select Sector", 
+                available_sec, 
+                #default=st.session_state['selected_sec'], 
+                key="sector_multiselect",
+                on_change=partial(on_pst_change, "sec")
             )
-        
+            if st.session_state['selected_sec']:
+                st.success(f"Selected Sectors: {', '.join(st.session_state['selected_sec'])}")
+            else:
+                st.error("No Sector selected")
+
         with col2:
+            if st.session_state['selected_sec']:
+                available_ind = df_dim[df_dim['sec'].isin(st.session_state['selected_sec'])]['ind'].unique().tolist()
             st.session_state['selected_ind'] = st.multiselect(
-                "Select Industry", available_ind, default=st.session_state['selected_ind'], key="industry_multiselect"
+                "Select Industry", 
+                available_ind, 
+                #default=st.session_state['selected_ind'], 
+                key="industry_multiselect",
+                on_change=partial(on_pst_change, "ind")
             )
-        
+            if st.session_state['selected_ind']:
+                st.success(f"Selected Industries: {', '.join(st.session_state['selected_ind'])}")
+            else:
+                st.error("No Industry selected")
+
         with col3:
             st.session_state['selected_pst'] = st.multiselect(
-                "Select pst Values", available_pst, default=st.session_state['selected_pst'], key="pst_multiselect"
+                "Select PST Values", 
+                available_pst, 
+                #default=st.session_state.get('selected_pst', []),  # Ensure default is not None
+                key="pst_multiselect",
+                on_change=partial(on_pst_change, "ps")
             )
+            if st.session_state['selected_pst']:
+                st.success(f"Selected PST Values: {', '.join(st.session_state['selected_pst'])}")
+            else:
+                st.error("No PST Values selected")
 
-        # Button to clear all filters and reapply the watchlist
-        if st.button("Clear All Filters and Reapply Watchlist"):
-            # Clear the dropdown filters
+        # Filter dataframe based on selections
+        filtered_df = filter_dataframe(df_dim, st.session_state['selected_pst'], st.session_state['selected_ind'], st.session_state['selected_sec'])
+
+        # Button to clear filters
+        if st.button("Clear All Filters"):
             st.session_state['selected_sec'] = []
             st.session_state['selected_ind'] = []
             st.session_state['selected_pst'] = []
-            # Reapply the watchlist filter
-            filtered_df = apply_watchlist_filter()  
+            st.rerun()
 
         # Add the radio button for time period selection
         time_period = st.radio("Select Time Period", options=["Daily", "Weekly", "Monthly"], index=2)
         fact_table = get_fact_table_for_period(time_period)  
 
-        # Only filter if dropdowns are updated; don't overwrite watchlist
-        if st.session_state['selected_pst'] or st.session_state['selected_ind'] or st.session_state['selected_sec']:
-            filtered_df = filter_dataframe(df_dim, st.session_state['selected_pst'], st.session_state['selected_ind'], st.session_state['selected_sec'])
-        else:
-            # If no filters are selected, keep showing the watchlist only
-            filtered_df = apply_watchlist_filter()
+    if not filtered_df.empty:
+        #first df test
+        #st.dataframe(filtered_df)
 
-        if not filtered_df.empty:
-            filtered_df['sym_cn'] = filtered_df['sym'] + " - " + filtered_df['cn']
-            df = filtered_df
-            values_with_colors = {
-                "Expensive": ("#f25829", "black"),
-                "High": ("#f2a529", "black"),
-                "Low": ("#85e043", "black"),
-                "Cheap": ("#2bad4e", "black")
+        #Main DF TEST
+        filtered_df['sym_cn'] = filtered_df['sym'] + " - " + filtered_df['cn']
+        df = filtered_df
+        values_with_colors = {
+            "Expensive": ("#f25829", "black"),
+            "High": ("#f2a529", "black"),
+            "Low": ("#85e043", "black"),
+            "Cheap": ("#2bad4e", "black")
+        }
+        highlight_function = highlight(values_with_colors)  
+        formatter = {
+            'sym': ('Symbol', PINLEFT),
+            'ind': ('Industry', {'width': 140}),
+            'ps': ('P/S', {**PRECISION_TWO, 'width': 80}),
+            'pst': ('PS Type', {
+                'cellStyle': highlight_function  # Apply the highlight function here
+                }),
+            'pe': ('P/E', {**PRECISION_TWO, 'width': 80}),
+            'pet': ('PE Type', {
+                'cellStyle': highlight_function  # Apply the highlight function here
+                }),
             }
-            highlight_function = highlight(values_with_colors)
-   
-            formatter = {
-                'sym': ('Symbol', PINLEFT),
-                'ind': ('Industry', {'width': 140}),
-                'ps': ('P/S', {**PRECISION_TWO, 'width': 80}),
-                'pst': ('PS Type', {
-                    'cellStyle': highlight_function  # Apply the highlight function here
-                    }),
-                'pe': ('P/E', {**PRECISION_TWO, 'width': 80}),
-                'pet': ('PE Type', {
-                    'cellStyle': highlight_function  # Apply the highlight function here
-                    }),
-                }
-            
-            # Draw the grid with single selection and use checkbox as a boolean
-            data = draw_grid(
-                df.head(100),
-                formatter=formatter,
-                fit_columns=True,
-                selection='single',  # Use 'single' or 'multiple' as required
-                use_checkbox=True,  # Use checkbox as a boolean
-                max_height=300,
-            )
-            
-            # Safely check if selected_rows exists and is not empty
-            selected_rows = getattr(data, 'selected_rows', None)
-            
-            # Check if selected_rows is not None and is a list
-            if selected_rows is not None and isinstance(selected_rows, list) and len(selected_rows) > 0:
-                # Process selected rows
-                for selected_row in selected_rows:
-                    if isinstance(selected_row, dict):
-                        selected_stock_symbol = selected_row.get('sym', 'N/A')
 
-    # This block is now outside the expander
+        # Draw the grid with single selection and use checkbox as a boolean
+        data = draw_grid(
+            df.head(100),
+            formatter=formatter,
+            fit_columns=True,
+            selection='single',  # Use 'single' or 'multiple' as required
+            use_checkbox=True,  # Use checkbox as a boolean
+            max_height=300,
+        )
+
+        # Safely check if selected_rows exists and is not empty
+        selected_rows = getattr(data, 'selected_rows', None)
+
+        # Check if selected_rows is not None and is a list
+        if selected_rows is not None and isinstance(selected_rows, list) and len(selected_rows) > 0:
+            # Process selected rows
+            for selected_row in selected_rows:
+                if isinstance(selected_row, dict):
+                    selected_stock_symbol = selected_row.get('sym', 'N/A')
+
+        # This block is now outside the expander
     if selected_stock_symbol:
         # Fetch stock prices based on selected stock symbol
         response_dim_det = supabase.table('dim_det').select('sym, pst, cn, ind, sec, ps, sps, psmin, ps2, ps5, ps8, psmax, psn, pst, pe, eps, pemin, pe2, pe5, pe8, pemax, pen, pet, dy, d, dymin, dy2, dy5, dy8, dymax, dyn, dyt, ex, trend_json_ss').eq('sym', selected_stock_symbol).execute()
@@ -447,5 +409,6 @@ if st.session_state['authenticated']:
                 st.warning(f"No stock price data found for {selected_stock_symbol}.")
         else:
             st.error(f"Failed to fetch data for {selected_stock_symbol}.")
+
     else:
         st.warning("No data matches the selected filters.")
