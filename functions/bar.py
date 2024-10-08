@@ -2,6 +2,8 @@ import plotly.graph_objects as go
 
 def plot_bar_chart(filtered_df, selected_stock_symbol):
     if not filtered_df.empty and 'sym' in filtered_df.columns and 'ps' in filtered_df.columns:
+        filtered_df = filtered_df.sort_values(by='ps', ascending=False)
+        
         fig_bar = go.Figure()
 
         # Add bar chart
