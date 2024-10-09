@@ -15,7 +15,7 @@ from functions.tradingview import show_single_stock_widget, show_ticker_tape
 from functions.macd import plot_macd_chart
 import yfinance as yf
 import streamlit.components.v1 as components
-from time import sleep
+import time
 
 # Set page configuration as the first Streamlit command
 st.set_page_config(layout="wide")
@@ -404,6 +404,40 @@ else:
                         supabase.table('app_keys').update({'watchlist': watchlist}).eq('key', st.session_state['user_key']).execute()
                         st.session_state['watchlist'] = watchlist
                         st.rerun()  # Rerun to update the display
+
+                _LOREM_IPSUM = """
+                1. Stock Price Performance Analysis: Over the past year, Starbucks' stock has underperformed its peers with a -23.14% decline, classified as 'Poor', but has shown recent positive momentum with a 16.08% increase in the last month and a 5.58% rise over the preceding three months.
+                2. Sales Growth Forecast: Starbucks' historical average yearly sales growth per share is modestly above Domino's Pizza and McDonald's, but below Yum! Brands. The company's projected growth rates are 9.84% in 2024, 10.75% in 2025, and 13.34% in 2026, all above the industry average, indicating strong sales growth trajectory ahead.
+                3. Price-to-Sales Valuation Analysis: Despite Starbucks' price-to-sales ratio of 2.5x being above its historical average, it is undervalued relative to its sector's average of 5.04x, with McDonald's at 7.28x and Domino's Pizza at 3.51x.
+                4. Stock Target Price Expected Return Analysis (2025): Starbucks' projected target price returns for 2025 range from -1.4% to 66.0%, the highest among its peers, with a notable variability and a 91% probability of positive returns at the low-end projection.
+                5. Stock Price Trend & Momentum Analysis: Starbucks' stock price trend is negative as indicated by the MACD Line being below both the Zero and Signal Lines, with a weakening momentum as evidenced by the declining MACD Histogram. Conversely, 67% of the peer group, including Darden Restaurants, shows an improvement in momentum, while Starbucks' peers like Domino's Pizza, McDonald's, and Yum! Brands exhibit a downward trajectory with deteriorating momentum.
+                Key takeaways: Starbucks has underperformed historically but shows recent positive stock price trends. The company is expected to have strong sales growth in the coming years, which, combined with an undervalued valuation, presents a promising outlook for investors despite current negative momentum indicators.
+                """
+
+                _LOREM_IPSUM2 = """
+                1. Stock Price Performance Analysis: Over the past year, Starbucks' stock has underperformed its peers with a -23.14% decline, classified as 'Poor', but has shown recent positive momentum with a 16.08% increase in the last month and a 5.58% rise over the preceding three months.
+                2. Sales Growth Forecast: Starbucks' historical average yearly sales growth per share is modestly above Domino's Pizza and McDonald's, but below Yum! Brands. The company's projected growth rates are 9.84% in 2024, 10.75% in 2025, and 13.34% in 2026, all above the industry average, indicating strong sales growth trajectory ahead.
+                3. Price-to-Sales Valuation Analysis: Despite Starbucks' price-to-sales ratio of 2.5x being above its historical average, it is undervalued relative to its sector's average of 5.04x, with McDonald's at 7.28x and Domino's Pizza at 3.51x.
+                4. Stock Target Price Expected Return Analysis (2025): Starbucks' projected target price returns for 2025 range from -1.4% to 66.0%, the highest among its peers, with a notable variability and a 91% probability of positive returns at the low-end projection.
+                5. Stock Price Trend & Momentum Analysis: Starbucks' stock price trend is negative as indicated by the MACD Line being below both the Zero and Signal Lines, with a weakening momentum as evidenced by the declining MACD Histogram. Conversely, 67% of the peer group, including Darden Restaurants, shows an improvement in momentum, while Starbucks' peers like Domino's Pizza, McDonald's, and Yum! Brands exhibit a downward trajectory with deteriorating momentum.
+                Key takeaways: Starbucks has underperformed historically but shows recent positive stock price trends. The company is expected to have strong sales growth in the coming years, which, combined with an undervalued valuation, presents a promising outlook for investors despite current negative momentum indicators.
+                """
+
+                def stream_data():
+                    for word in _LOREM_IPSUM.split(" "):
+                        yield word + " "
+                        time.sleep(0.02)
+
+                    yield pd.DataFrame(filtered_df)
+                    
+                    yield plot_metric(df_fact, selected_stock_symbol, df_text_labels, metric_type='ps', metric_color='limegreen')
+
+                    for word in _LOREM_IPSUM2.split(" "):
+                        yield word + " "
+                        time.sleep(0.02)
+
+                if st.button("Stream data"):
+                    st.write_stream(stream_data)
 
             else:
                 st.warning(f"No stock price data found for {selected_stock_symbol}.")
