@@ -185,9 +185,9 @@ else:
         filtered_df['sym_cn'] = filtered_df['sym'] + " - " + filtered_df['cn']
         df = filtered_df
         values_with_colors = {
-            "Expensive": ("red", "white"),
-            "High": ("orange", "white"),
-            "Low": ("green", "white"),
+            "Expensive": ("red", "black"),
+            "High": ("orange", "black"),
+            "Low": ("green", "black"),
             "Cheap": ("lightgreen", "black")
         }
         highlight_function = highlight(values_with_colors)  
