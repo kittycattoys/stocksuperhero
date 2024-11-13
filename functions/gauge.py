@@ -49,31 +49,31 @@ def create_pie_chart(df_dim_det, metric_type, metric_color):
                 go.layout.Annotation(
                     text=f"<b>{df_dim_det[f'{metric_type}max'].iloc[0]}x</b>",
                     x=1.13, y=0.43, xanchor="center", yanchor="bottom",
-                    font=dict(size=quadrant_label_font_size, color="red"),
+                    font=dict(size=quadrant_label_font_size, color="lightgreen"),
                     showarrow=False
                 ),
                 go.layout.Annotation(
                     text=f"<b>{df_dim_det[f'{metric_type}8'].iloc[0]}x</b>",
                     x=1, y=0.8, xanchor="center", yanchor="bottom",
-                    font=dict(size=quadrant_label_font_size, color="orange"),
+                    font=dict(size=quadrant_label_font_size, color="green"),
                     showarrow=False
                 ),
                 go.layout.Annotation(
                     text=f"<b>{df_dim_det[f'{metric_type}5'].iloc[0]}x</b>",
                     x=0.5, y=0.95, xanchor="center", yanchor="bottom",
-                    font=dict(size=quadrant_label_font_size, color="#eff229"),
+                    font=dict(size=quadrant_label_font_size, color="yellow"),
                     showarrow=False
                 ),
                 go.layout.Annotation(
                     text=f"<b>{df_dim_det[f'{metric_type}2'].iloc[0]}x</b>",
                     x=0, y=0.8, xanchor="center", yanchor="bottom",
-                    font=dict(size=quadrant_label_font_size, color="green"),
+                    font=dict(size=quadrant_label_font_size, color="orange"),
                     showarrow=False
                 ),
                 go.layout.Annotation(
                     text=f"<b>{df_dim_det[f'{metric_type}min'].iloc[0]}x</b>",
                     x=-0.13, y=0.43, xanchor="center", yanchor="bottom",
-                    font=dict(size=quadrant_label_font_size, color="lightgreen"),
+                    font=dict(size=quadrant_label_font_size, color="red"),
                     showarrow=False
                 )
             ],
