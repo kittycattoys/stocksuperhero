@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 def create_pie_chart(df_dim_det, metric_type, metric_color):
     # Define the background color and quadrant colors
     plot_bgcolor = "rgba(255, 255, 255, 0)"
-    quadrant_colors = [plot_bgcolor, "red", "orange", "green", "lightseagreen"]
+    quadrant_colors = [plot_bgcolor, "red", "orange", "green", "lightgreen"]
     quadrant_text = ["", "<b>Very High</b>", "<b>High</b>", "<b>Medium</b>", "<b>Low</b>", "<b>Very low</b>"]
     n_quadrants = len(quadrant_colors) - 1
 
@@ -73,7 +73,7 @@ def create_pie_chart(df_dim_det, metric_type, metric_color):
                 go.layout.Annotation(
                     text=f"<b>{df_dim_det[f'{metric_type}min'].iloc[0]}x</b>",
                     x=-0.13, y=0.43, xanchor="center", yanchor="bottom",
-                    font=dict(size=quadrant_label_font_size, color="lightseagreen"),
+                    font=dict(size=quadrant_label_font_size, color="lightgreen"),
                     showarrow=False
                 )
             ],
