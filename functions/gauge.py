@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 def create_pie_chart(df_dim_det, metric_type, metric_color):
     # Define the background color and quadrant colors
     plot_bgcolor = "rgba(255, 255, 255, 0)"
-    quadrant_colors = [plot_bgcolor, "red", "orange", "green", "LightSeaGreen"]
+    quadrant_colors = [plot_bgcolor, "red", "orange", "green", "lightseagreen"]
     quadrant_text = ["", "<b>Very High</b>", "<b>High</b>", "<b>Medium</b>", "<b>Low</b>", "<b>Very low</b>"]
     n_quadrants = len(quadrant_colors) - 1
 
@@ -49,13 +49,13 @@ def create_pie_chart(df_dim_det, metric_type, metric_color):
                 go.layout.Annotation(
                     text=f"<b>{df_dim_det[f'{metric_type}max'].iloc[0]}x</b>",
                     x=1.13, y=0.43, xanchor="center", yanchor="bottom",
-                    font=dict(size=quadrant_label_font_size, color="#f25829"),
+                    font=dict(size=quadrant_label_font_size, color="red"),
                     showarrow=False
                 ),
                 go.layout.Annotation(
                     text=f"<b>{df_dim_det[f'{metric_type}8'].iloc[0]}x</b>",
                     x=1, y=0.8, xanchor="center", yanchor="bottom",
-                    font=dict(size=quadrant_label_font_size, color="#f2a529"),
+                    font=dict(size=quadrant_label_font_size, color="orange"),
                     showarrow=False
                 ),
                 go.layout.Annotation(
@@ -67,13 +67,13 @@ def create_pie_chart(df_dim_det, metric_type, metric_color):
                 go.layout.Annotation(
                     text=f"<b>{df_dim_det[f'{metric_type}2'].iloc[0]}x</b>",
                     x=0, y=0.8, xanchor="center", yanchor="bottom",
-                    font=dict(size=quadrant_label_font_size, color="#85e043"),
+                    font=dict(size=quadrant_label_font_size, color="green"),
                     showarrow=False
                 ),
                 go.layout.Annotation(
                     text=f"<b>{df_dim_det[f'{metric_type}min'].iloc[0]}x</b>",
                     x=-0.13, y=0.43, xanchor="center", yanchor="bottom",
-                    font=dict(size=quadrant_label_font_size, color="#2bad4e"),
+                    font=dict(size=quadrant_label_font_size, color="lightseagreen"),
                     showarrow=False
                 )
             ],
