@@ -29,7 +29,7 @@ def create_pie_chart(df_dim_det, metric_type, metric_color):
             text=quadrant_text,
             textinfo="text",
             hoverinfo="skip",
-            textfont=dict(color="white") 
+            textfont=dict(color="dimgray") 
         )],
         layout=go.Layout(
             showlegend=False,
