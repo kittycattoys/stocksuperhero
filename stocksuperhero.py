@@ -16,6 +16,7 @@ from functions.macd import plot_macd_chart
 import yfinance as yf
 import streamlit.components.v1 as components
 import time
+from functions.vector_search import get_supabase_dataframe
 
 # Set page configuration as the first Streamlit command
 st.set_page_config(layout="wide")
@@ -227,13 +228,18 @@ else:
         # This block is now outside the expander
     if selected_stock_symbol:
         # Fetch stock prices based on selected stock symbol
-        response_dim_det = supabase.table('dim_det').select('sym, pst, cn, ind, sec, ps, sps, psmin, ps2, ps5, ps8, psmax, psn, pst, pe, eps, pemin, pe2, pe5, pe8, pemax, pen, pet, dy, d, dymin, dy2, dy5, dy8, dymax, dyn, dyt, ex, trend_json_ss').eq('sym', selected_stock_symbol).execute()
+        response_dim_det = supabase.table('dim_det').select('sym, pst, cn, ind, sec, ps, sps, psmin, ps2, ps5, ps8, psmax, psn, pst, pe, eps, pemin, pe2, pe5, pe8, pemax, pen, pet, dy, d, dymin, dy2, dy5, dy8, dymax, dyn, dyt, ex, trend_json_ss, v_ps, v_rsi').eq('sym', selected_stock_symbol).execute()
         response_fact = supabase.table(fact_table).select('sym, dt_st, p, high_tp, mid_tp, low_tp, ps, sps, pe, eps, dy, d').eq('sym', selected_stock_symbol).execute()
         response_tech = supabase.table('stocksuperhero_tech_monthly').select('sym, dt_st, p, rsi, md, mds, mdh').eq('sym', selected_stock_symbol).execute()
         if response_fact.data:
             df_fact = pd.DataFrame(response_fact.data)
             df_dim_det = pd.DataFrame(response_dim_det.data)
             df_tech = pd.DataFrame(response_tech.data)
+
+            #get similar names based on selected weights
+            df_vector_search = get_supabase_dataframe(df_dim_det['v_ps'], df_dim_det['v_rsi'])
+            print(df_vector_search)
+
             if not df_fact.empty:
                 # Extract the first row's 'trend_json_ss' data (if there's only one row per stock symbol)
                 json_data = df_dim_det.loc[0, 'trend_json_ss']
