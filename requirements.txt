@@ -6,3 +6,4 @@ plotly
 matplotlib
 streamlit-aggrid
 yfinance
+psycopg2
